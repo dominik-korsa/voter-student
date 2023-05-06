@@ -4,7 +4,7 @@
   }">
     <div class="podium-stand podium-stand--second">
       <div class="podium-stand__bottom">3 punkty</div>
-      <card-slot>
+      <card-slot :active="active">
         Przeciągnij tutaj logo, któremu dajesz <b>3&nbsp;punkty</b>
         <template #card>
           <div class="podium-stand__card" ref="second" />
@@ -17,7 +17,7 @@
     </div>
     <div class="podium-stand podium-stand--first">
       <div class="podium-stand__bottom">5 punktów</div>
-      <card-slot>
+      <card-slot :active="active">
         Przeciągnij tutaj logo, któremu dajesz <b>5&nbsp;punktów</b>
         <template #card>
           <div class="podium-stand__card" ref="first" />
@@ -30,7 +30,7 @@
     </div>
     <div class="podium-stand podium-stand--third">
       <div class="podium-stand__bottom">1 punkt</div>
-      <card-slot>
+      <card-slot :active="active">
         Przeciągnij tutaj logo, któremu dajesz <b>1&nbsp;punkt</b>
         <template #card>
           <div class="podium-stand__card" ref="third">
@@ -55,6 +55,7 @@ import PodiumCard from "./PodiumCard.vue";
 
 defineProps({
   reveal: Boolean,
+  active: Boolean,
   cards: {
     type: Array as PropType<(CardReference | null)[]>,
     required: true,

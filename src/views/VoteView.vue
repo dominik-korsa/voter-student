@@ -23,6 +23,7 @@
     <div class="vote__shelf">
       <podium
         :reveal="revealPodium"
+        :active="dragging"
         @update:hovered="podiumHover = $event"
         :cards="podiumCards"
       />

@@ -96,22 +96,21 @@ export const useDragged = (
             top: cardElValue.offsetTop,
         }), event, event.pointerType === 'touch');
     }, {passive: true});
-    useEventListener(cardEl, ['pointercancel', 'pointerup', 'pointerleave'], (event) => {
-        if (state.value.type === 'dragging') console.log('Cancelled drag due to:', event.type);
+    useEventListener(cardEl, ['pointercancel', 'pointerup', 'pointerleave'], () => {
+        cancel();
+    }, { passive: true });
+    useEventListener(window, 'scroll', () => {
         cancel();
     }, { passive: true });
     useEventListener(cardEl, 'touchmove', (event) => {
         if (state.value.type !== 'dragging') return;
         event.preventDefault();
     }, { passive: false });
-    useEventListener(window, 'scroll', () => {
-        cancel();
-    });
     useEventListener(cardEl, 'pointermove', (event: PointerEvent) => {
         if (state.value.type === 'idle') return;
         if (state.value.pointer.pointerId !== event.pointerId) return;
         state.value.pointer = event;
-    }, { passive: false });
+    }, { passive: true });
 
     return {
         dragged: computedEager(() => state.value.type === 'dragging'),

@@ -21,7 +21,7 @@
 import {logicOr} from "@vueuse/math";
 import {useNonTouchHover} from "../composables/hover";
 import {useDragged} from "../composables/dragged";
-import {computed, onUpdated, reactive, ref, watch} from "vue";
+import {computed, reactive, ref, watch} from "vue";
 import {useCapacitor} from "../composables/capacitor";
 import {computedEager, useVibrate, watchImmediate} from "@vueuse/core";
 import {CardReference} from "../types";
@@ -41,10 +41,6 @@ const emit = defineEmits(['begin-dragging', 'end-dragging']);
 
 const wrapperEl = ref<HTMLDivElement>();
 const el = ref<HTMLDivElement>();
-
-onUpdated(() => {
-    console.log('Card updated', props.number);
-})
 
 const { dragged, getStyle, startNow } = useDragged(el, wrapperEl);
 const draggedRaised = useCapacitor(dragged, 300);
@@ -71,9 +67,4 @@ const style = computed(() => {
 watch(() => props.isDocked, () => {
     vibrate();
 });
-
-// useDynamicTeleport(el, () => {
-//   if (draggedRaised.value) return null;
-//   return props.target ?? null;
-// }, wrapperEl);
 </script>
