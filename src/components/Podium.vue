@@ -122,6 +122,7 @@ $line-height: 24px;
       overflow: hidden;
       transition: margin-bottom $transition-duration;
       margin-top: 8px;
+      box-shadow: 3px 3px #0003;
     }
 
     &.podium-stand--first {
