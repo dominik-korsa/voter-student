@@ -35,7 +35,7 @@
 <script lang="ts" setup>
 import Podium from "../components/Podium.vue";
 import {computedEager, templateRef, useVibrate} from "@vueuse/core";
-import {ref, watch} from "vue";
+import {reactive, ref, watch} from "vue";
 import CardSlot from "../components/CardSlot.vue";
 import {logicOr} from "@vueuse/math";
 import {CardReference} from "../types";
@@ -47,11 +47,11 @@ const { vibrate } = useVibrate({ pattern: 50 });
 
 const podium = templateRef<InstanceType<typeof Podium>>('podium');
 
-const draggedCard = ref<CardReference | null>(null);
+const draggedCards = reactive(new Set<number>());
 const podiumCards = ref<(CardReference | null)[]>([null, null, null]);
 
-const onDragStart = (card: CardReference) => { draggedCard.value = card; };
-const onDragEnd = () => { draggedCard.value = null; };
+const onDragStart = (card: CardReference) => { draggedCards.add(card.number); };
+const onDragEnd = (card: CardReference) => { draggedCards.delete(card.number); };
 const onDragMove = (card: CardReference, event: PointerEvent) => {
     const hovered = podium.value.getHovered(event);
     const newCards = podiumCards.value.map((current, index): CardReference | null => {
@@ -62,7 +62,7 @@ const onDragMove = (card: CardReference, event: PointerEvent) => {
     if (newCards.every((el, index) => el?.number === podiumCards.value[index]?.number)) return;
     podiumCards.value = newCards;
 }
-const dragging = computedEager(() => draggedCard.value !== null);
+const dragging = computedEager(() => draggedCards.size > 0);
 
 const scrollEnd = useWindowScrollEnd();
 watch(() => scrollEnd.value, () => {
