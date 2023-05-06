@@ -1,7 +1,5 @@
 <template>
-  <div class="podium" :class="{
-    'podium--reveal': reveal
-  }">
+  <div class="podium">
     <div class="podium-stand podium-stand--second">
       <div class="podium-stand__bottom">3 punkty</div>
       <card-slot :active="active">
@@ -54,7 +52,6 @@ import PodiumCard from "./PodiumCard.vue";
 import {isInside} from "../utils";
 
 defineProps({
-  reveal: Boolean,
   active: Boolean,
   cards: {
     type: Array as PropType<(CardReference | null)[]>,
@@ -75,18 +72,17 @@ defineExpose({ getHovered });
 <style lang="scss">
 @import "src/assets/constants";
 
-$transition-duration: 200ms;
 $line-height: 24px;
+
+.vote:not(.vote--reveal-podium) .podium-stand .podium-stand__bottom {
+  margin-bottom: calc((-2) * var(--vertical-padding) - $line-height);
+}
 
 .podium {
   display: flex;
   grid-gap: $card-gap;
   align-items: flex-end;
   justify-content: center;
-
-  &:not(.podium--reveal) .podium-stand .podium-stand__bottom {
-    margin-bottom: calc((-2) * var(--vertical-padding) - $line-height);
-  }
 
   .podium-stand {
     width: var(--card-width);
@@ -102,7 +98,7 @@ $line-height: 24px;
       background: white;
       text-align: center;
       overflow: hidden;
-      transition: margin-bottom $transition-duration;
+      transition: margin-bottom $podium-transition-duration;
       margin-top: 8px;
       box-shadow: 3px 3px #0003;
     }
