@@ -23,7 +23,8 @@ type State = IdleState | WaitingState | DraggingState;
 
 export const useDragged = (
     cardEl: Ref<HTMLElement | undefined>,
-    parentEl: Ref<HTMLElement | undefined>
+    parentEl: Ref<HTMLElement | undefined>,
+    onMove: (event: PointerEvent) => void,
 ) => {
     const { vibrate } = useVibrate({pattern: 40});
 
@@ -110,6 +111,7 @@ export const useDragged = (
         if (state.value.type === 'idle') return;
         if (state.value.pointer.pointerId !== event.pointerId) return;
         state.value.pointer = event;
+        onMove(event);
     }, { passive: true });
 
     return {

@@ -1,12 +1,10 @@
-export interface PodiumHovered {
-    index: number;
-    slot: HTMLDivElement;
-}
-
-export interface StatePointer {
-    pointerId: number;
+export interface Pos {
     x: number;
     y: number;
+}
+
+export interface StatePointer extends Pos {
+    pointerId: number;
 }
 
 export interface CardReference {

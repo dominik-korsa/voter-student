@@ -37,12 +37,18 @@ const props = defineProps({
   isDocked: Boolean,
 });
 
-const emit = defineEmits(['begin-dragging', 'end-dragging']);
+const emit = defineEmits<{
+    (e: 'begin-dragging', card: CardReference): void;
+    (e: 'end-dragging', card: CardReference): void;
+    (e: 'dragging-move', card: CardReference, event: PointerEvent): void;
+}>()
 
 const wrapperEl = ref<HTMLDivElement>();
 const el = ref<HTMLDivElement>();
 
-const { dragged, getStyle, startNow } = useDragged(el, wrapperEl);
+const { dragged, getStyle, startNow } = useDragged(el, wrapperEl, (event) => {
+    emit('dragging-move', cardReference, event);
+});
 const draggedRaised = useCapacitor(dragged, 300);
 const raised = logicOr(
     draggedRaised,

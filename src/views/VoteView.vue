@@ -15,6 +15,7 @@
             :isDocked="card.docked"
             @begin-dragging="onDragStart"
             @end-dragging="onDragEnd"
+            @dragging-move="onDragMove"
           />
         </template>
       </card-slot>
@@ -24,8 +25,8 @@
       <podium
         :reveal="revealPodium"
         :active="dragging"
-        @update:hovered="podiumHover = $event"
         :cards="podiumCards"
+        ref="podium"
       />
     </div>
   </div>
@@ -33,35 +34,34 @@
 
 <script lang="ts" setup>
 import Podium from "../components/Podium.vue";
-import {computedEager, useVibrate} from "@vueuse/core";
-import {ref, watch, watchEffect} from "vue";
+import {computedEager, templateRef, useVibrate} from "@vueuse/core";
+import {ref, watch} from "vue";
 import CardSlot from "../components/CardSlot.vue";
 import {logicOr} from "@vueuse/math";
-import {CardReference, PodiumHovered} from "../types";
+import {CardReference} from "../types";
 import DraggableCard from "../components/DraggableCard.vue";
 import {useWindowScrollEnd} from "../composables/windows-scroll-end";
 import {range} from "../utils";
 
 const { vibrate } = useVibrate({ pattern: 50 });
 
-const draggedCard = ref<CardReference | null>(null);
-const podiumHover = ref<PodiumHovered | null>(null);
-const podiumCards = ref<(CardReference | null)[]>([null, null, null]);
+const podium = templateRef<InstanceType<typeof Podium>>('podium');
 
-watchEffect(() => {
-  const cardValue = draggedCard.value;
-  if (cardValue === null) return;
-  podiumCards.value = podiumCards.value.map((current, index): CardReference | null => {
-    if (podiumHover.value && podiumHover.value?.index === index) {
-      if (current === null) return cardValue;
-    }
-    if ((podiumHover.value && podiumHover.value?.index === index) || current?.number !== cardValue.number) return current;
-    return null;
-  });
-});
+const draggedCard = ref<CardReference | null>(null);
+const podiumCards = ref<(CardReference | null)[]>([null, null, null]);
 
 const onDragStart = (card: CardReference) => { draggedCard.value = card; };
 const onDragEnd = () => { draggedCard.value = null; };
+const onDragMove = (card: CardReference, event: PointerEvent) => {
+    const hovered = podium.value.getHovered(event);
+    const newCards = podiumCards.value.map((current, index): CardReference | null => {
+        if (hovered === index && current === null) return card;
+        if (hovered !== index && current?.number === card.number) return null;
+        return current;
+    });
+    if (newCards.every((el, index) => el?.number === podiumCards.value[index]?.number)) return;
+    podiumCards.value = newCards;
+}
 const dragging = computedEager(() => draggedCard.value !== null);
 
 const scrollEnd = useWindowScrollEnd();

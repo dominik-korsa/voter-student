@@ -46,12 +46,12 @@
 </template>
 
 <script lang="ts" setup>
-import {computedEager, templateRef, useMouseInElement, watchImmediate} from "@vueuse/core";
+import {templateRef} from "@vueuse/core";
 import CardSlot from "./CardSlot.vue";
 import {PropType} from "vue";
-import {logicNot} from "@vueuse/math";
-import {CardReference, PodiumHovered} from "../types";
+import {CardReference, Pos} from "../types";
 import PodiumCard from "./PodiumCard.vue";
+import {isInside} from "../utils";
 
 defineProps({
   reveal: Boolean,
@@ -62,32 +62,14 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['update:hovered']);
+const slots = ['first', 'second', 'third'].map((key) => templateRef<HTMLDivElement>(key));
 
-const getSlotRef = (key: string) => {
-  const el = templateRef<HTMLDivElement>(key);
-  const { isOutside } = useMouseInElement(el);
-  return {
-    el,
-    hovered: logicNot(isOutside),
-  }
-}
-const slots = ['first', 'second', 'third'].map(getSlotRef);
-
-const hoveredSlot = computedEager<PodiumHovered | null>(
-  () => {
-    const index = slots.findIndex((el) => el.hovered.value);
+const getHovered = (pos: Pos): number | null => {
+    const index = slots.findIndex((slot) => isInside(slot.value, pos));
     if (index === -1) return null;
-    return {
-      index,
-      slot: slots[index].el.value,
-    }
-  }
-);
-watchImmediate(hoveredSlot, (value, oldValue) => {
-    if (value && oldValue && value.index === oldValue.index) return;
-    emit('update:hovered', value)
-});
+    return index;
+}
+defineExpose({ getHovered });
 </script>
 
 <style lang="scss">

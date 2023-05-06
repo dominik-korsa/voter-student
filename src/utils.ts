@@ -1,4 +1,4 @@
-import {Offset} from "./types";
+import {Offset, Pos} from "./types";
 
 export const getGlobalOffset = (el: HTMLElement): Offset => {
     const offset = { left: window.scrollX, top: window.scrollY };
@@ -22,4 +22,11 @@ export const range = (from: number, to: number) => {
     const array: number[] = [];
     for (let i = from; i < to; ++i) array.push(i);
     return array;
+}
+
+export const isInside = (el: HTMLElement, pos: Pos) => {
+    const rect = el.getBoundingClientRect();
+    const elementX = pos.x - rect.left;
+    const elementY = pos.y - rect.top;
+    return elementX >= 0 && elementX <= rect.width && elementY >= 0 && elementY <= rect.width;
 }
