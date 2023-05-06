@@ -1,5 +1,9 @@
 <template>
-  <button class="floating-button">
+  <button
+    class="floating-button"
+    :disabled="disable"
+    :tabindex="disable ? -1 : 0"
+  >
     <slot />
   </button>
 </template>
@@ -8,7 +12,9 @@
 import {defineComponent} from "vue";
 
 export default defineComponent({
-
+  props: {
+      disable: Boolean,
+  }
 });
 </script>
 
@@ -29,7 +35,12 @@ export default defineComponent({
   font-size: 1rem;
   font-family: inherit;
   font-weight: bold;
-  transition: bottom $podium-transition-duration, right $podium-transition-duration, box-shadow 200ms, transform 200ms;
+  transition:
+    bottom $podium-transition-duration,
+    right $podium-transition-duration,
+    left $podium-transition-duration,
+    box-shadow 200ms,
+    transform 200ms;
   cursor: pointer;
   --height: calc(2 * var(--vertical-padding) + #{$line-height});
 

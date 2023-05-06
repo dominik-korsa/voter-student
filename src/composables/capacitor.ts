@@ -1,7 +1,7 @@
-import {ref, watch} from "vue";
-import {ReadonlyRefOrGetter, toValue} from "@vueuse/core";
+import {ref, watch, WatchSource} from "vue";
+import {toValue} from "@vueuse/core";
 
-export const useCapacitor = (src: ReadonlyRefOrGetter<boolean>, timeout: number) => {
+export const useCapacitor = (src: WatchSource<boolean>, timeout: number) => {
     let cancelTimeoutId: number | undefined;
     const result = ref(toValue(src));
     watch(src, (value) => {

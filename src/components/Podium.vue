@@ -1,55 +1,41 @@
 <template>
   <div class="podium">
-    <div class="podium-stand podium-stand--second">
-      <div class="podium-stand__bottom">3 punkty</div>
-      <card-slot :active="active">
-        Przeciągnij tutaj logo, któremu dajesz <b>3&nbsp;punkty</b>
-        <template #card>
-          <div class="podium-stand__card" ref="second" />
-            <podium-card
-              v-if="cards[1] !== null"
-              :card="cards[1]!"
-            />
-        </template>
-      </card-slot>
-    </div>
-    <div class="podium-stand podium-stand--first">
-      <div class="podium-stand__bottom">5 punktów</div>
-      <card-slot :active="active">
-        Przeciągnij tutaj logo, któremu dajesz <b>5&nbsp;punktów</b>
-        <template #card>
-          <div class="podium-stand__card" ref="first" />
-            <podium-card
-              v-if="cards[0] !== null"
-              :card="cards[0]!"
-            />
-        </template>
-      </card-slot>
-    </div>
-    <div class="podium-stand podium-stand--third">
-      <div class="podium-stand__bottom">1 punkt</div>
-      <card-slot :active="active">
-        Przeciągnij tutaj logo, któremu dajesz <b>1&nbsp;punkt</b>
-        <template #card>
-          <div class="podium-stand__card" ref="third">
-            <podium-card
-              v-if="cards[2] !== null"
-              :card="cards[2]!"
-            />
-          </div>
-        </template>
-      </card-slot>
-    </div>
+    <podium-stand
+      class="podium-stand--second"
+      ref="second"
+      label="3 punkty"
+      :active="active"
+      :card="cards[1]"
+    >
+      Przeciągnij tutaj logo, któremu dajesz <b>3&nbsp;punkty</b>
+    </podium-stand>
+    <podium-stand
+      class="podium-stand--first"
+      label="5 punktów"
+      :active="active"
+      ref="first"
+      :card="cards[0]"
+    >
+      Przeciągnij tutaj logo, któremu dajesz <b>5&nbsp;punktów</b>
+    </podium-stand>
+    <podium-stand
+      class="podium-stand--third"
+      label="1 punkt"
+      :active="active"
+      ref="third"
+      :card="cards[2]"
+    >
+      Przeciągnij tutaj logo, któremu dajesz <b>1&nbsp;punkt</b>
+    </podium-stand>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {templateRef} from "@vueuse/core";
-import CardSlot from "./CardSlot.vue";
 import {PropType} from "vue";
 import {CardReference, Pos} from "../types";
-import PodiumCard from "./PodiumCard.vue";
 import {isInside} from "../utils";
+import PodiumStand from "./PodiumStand.vue";
 
 defineProps({
   active: Boolean,
@@ -59,10 +45,10 @@ defineProps({
   },
 });
 
-const slots = ['first', 'second', 'third'].map((key) => templateRef<HTMLDivElement>(key));
+const slots = ['first', 'second', 'third'].map((key) => templateRef<InstanceType<typeof PodiumStand>>(key));
 
 const getHovered = (pos: Pos): number | null => {
-    const index = slots.findIndex((slot) => isInside(slot.value, pos));
+    const index = slots.findIndex((slot) => isInside(slot.value.targetEl, pos));
     if (index === -1) return null;
     return index;
 }
@@ -72,51 +58,10 @@ defineExpose({ getHovered });
 <style lang="scss">
 @import "src/assets/constants";
 
-$line-height: 24px;
-
-.vote:not(.vote--reveal-podium) .podium-stand .podium-stand__bottom {
-  margin-bottom: calc((-2) * var(--vertical-padding) - $line-height);
-}
-
 .podium {
   display: flex;
   grid-gap: $card-gap;
   align-items: flex-end;
   justify-content: center;
-
-  .podium-stand {
-    width: var(--card-width);
-    display: flex;
-    flex-direction: column-reverse;
-    justify-content: end;
-
-    .podium-stand__bottom {
-      border-top: 12px solid var(--color);
-      padding: calc(var(--vertical-padding)) 4px;
-      line-height: $line-height;
-      white-space: nowrap;
-      background: white;
-      text-align: center;
-      overflow: hidden;
-      transition: margin-bottom $podium-transition-duration;
-      margin-top: 8px;
-      box-shadow: 3px 3px #0003;
-    }
-
-    &.podium-stand--first {
-      --vertical-padding: 24px;
-      --color: goldenrod;
-    }
-
-    &.podium-stand--second {
-      --vertical-padding: 16px;
-      --color: silver;
-    }
-
-    &.podium-stand--third {
-      --vertical-padding: 8px;
-      --color: saddlebrown;
-    }
-  }
 }
 </style>

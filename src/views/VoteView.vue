@@ -3,6 +3,7 @@
     'vote--dragging': dragging,
     'vote--reveal-podium': revealPodium,
     'vote--scroll-end': scrollEnd,
+    'vote--desktop': isDesktop,
   }">
     <div class="vote__list" v-memo="[cards]">
       <card-slot
@@ -23,42 +24,74 @@
       </card-slot>
     </div>
     <div class="vote__overlay" />
-    <floating-button class="vote__next" :class="{
-        'vote__next--hidden': nextHidden,
-    }">
+      <floating-button
+        class="vote__button vote__button--prev"
+        :disable="isDesktop || prevHidden"
+        @click="showStandOfShame = false"
+      >
+      👈 Wstecz
+    </floating-button>
+    <floating-button
+      class="vote__button vote__button--next"
+      :disable="isDesktop || nextHidden"
+      @click="showStandOfShame = true"
+    >
         Dalej 👉
     </floating-button>
-    <div class="vote__shelf">
+    <div
+      class="vote__shelf"
+      :class="{
+        'vote__shelf--show-stand-of-shame': isDesktop ? standOfShameAllowed : showStandOfShame,
+      }"
+    >
+      <div class="vote__shelf-spacer-1" />
       <podium
         :active="dragging"
         :cards="podiumCards"
         ref="podium"
       />
+      <div class="vote__shelf-spacer-2" />
+      <stand-of-shame />
+      <div class="vote__shelf-spacer-3" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import Podium from "../components/Podium.vue";
-import {computedEager, templateRef, useVibrate} from "@vueuse/core";
+import {computedEager, templateRef, useVibrate, useWindowSize} from "@vueuse/core";
 import {computed, reactive, ref, watch} from "vue";
 import CardSlot from "../components/CardSlot.vue";
-import {logicOr} from "@vueuse/math";
+import {logicOr, not} from "@vueuse/math";
 import {CardReference} from "../types";
 import DraggableCard from "../components/DraggableCard.vue";
 import {useWindowScrollEnd} from "../composables/windows-scroll-end";
 import {range} from "../utils";
 import FloatingButton from "../components/FloatingButton.vue";
+import StandOfShame from "../components/StandOfShame.vue";
+import {useLatch} from "../composables/latch";
+import {useCapacitor} from "../composables/capacitor";
 
 const { vibrate } = useVibrate({ pattern: 50 });
 
 const podium = templateRef<InstanceType<typeof Podium>>('podium');
 
 const draggedCards = reactive(new Set<number>());
+const dragging = computedEager(() => draggedCards.size > 0);
 const podiumCards = ref<(CardReference | null)[]>([null, null, null]);
 
+const podiumCardsSet = computed(() => podiumCards.value.every((el) => el !== null));
+const showStandOfShame = ref(false);
+const standOfShameAllowed = useLatch(not(useCapacitor(
+    logicOr(
+      not(podiumCardsSet),
+      dragging,
+    ),
+    750,
+)));
+const prevHidden = computed(() => !showStandOfShame.value);
 const nextHidden = computed(
-  () => podiumCards.value.some((el) => el === null),
+  () => !standOfShameAllowed.value || showStandOfShame.value || !podiumCardsSet.value,
 );
 
 const onDragStart = (card: CardReference) => { draggedCards.add(card.number); };
@@ -73,12 +106,13 @@ const onDragMove = (card: CardReference, event: PointerEvent) => {
     if (newCards.every((el, index) => el?.number === podiumCards.value[index]?.number)) return;
     podiumCards.value = newCards;
 }
-const dragging = computedEager(() => draggedCards.size > 0);
 
 const scrollEnd = useWindowScrollEnd(60);
 watch(() => scrollEnd.value, () => {
   vibrate();
 });
+const windowSize = useWindowSize();
+const isDesktop = computed(() => windowSize.width.value >= 900);
 
 const revealPodium = logicOr(scrollEnd, dragging);
 
@@ -134,19 +168,31 @@ const cards = computedEager(() => {
 
   $vote-next-width: 72px;
 
-  .vote__next {
+  .vote__button {
     z-index: 1;
     position: fixed;
-    right: 16px;
     bottom: 122px;
     box-sizing: content-box;
   }
 
-  &.vote--scroll-end .vote__next {
+  .vote__button--prev {
+    left: 16px;
+  }
+
+  .vote__button--next {
+    right: 16px;
+  }
+
+  &.vote--scroll-end .vote__button {
     bottom: calc(180px - var(--height) / 2 + 2px);
   }
 
-  &.vote--dragging .vote__next, .vote__next.vote__next--hidden {
+  &.vote--dragging .vote__button--prev, .vote__button--prev:disabled {
+    left: -132px;
+    pointer-events: none;
+  }
+
+  &.vote--dragging .vote__button--next, .vote__button--next:disabled {
     right: -120px;
     pointer-events: none;
   }
@@ -158,6 +204,75 @@ const cards = computedEager(() => {
     background: $background;
     padding-top: 8px;
     box-shadow: 0 0 0 3px #0003;
+    display: flex;
+    overflow: hidden;
+
+    .podium {
+      width: 100%;
+      flex-shrink: 0;
+      transition: margin-left 300ms;
+    }
+
+    .stand-of-shame {
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    &.vote__shelf--show-stand-of-shame .podium {
+      margin-left: -100%;
+    }
+  }
+
+  &.vote--desktop {
+    .vote__shelf {
+      display: flex;
+
+      .podium {
+        width: auto;
+        margin-left: 0;
+      }
+
+      $transition-duration: 500ms;
+
+      .stand-of-shame {
+        max-width: 0;
+        overflow: hidden;
+        flex-basis: fit-content;
+        transition: max-width $transition-duration;
+      }
+
+      .vote__shelf-spacer-1, .vote__shelf-spacer-2, .vote__shelf-spacer-3 {
+        transition: flex-grow $transition-duration, flex-basis $transition-duration;
+      }
+
+      .vote__shelf-spacer-1, .vote__shelf-spacer-2 {
+        flex-grow: 1;
+        flex-basis: 0;
+      }
+
+      .vote__shelf-spacer-2 {
+        width: 32px;
+      }
+
+      &.vote__shelf--show-stand-of-shame {
+        .podium {
+          margin-left: 0;
+        }
+
+        .stand-of-shame {
+          max-width: 450px;
+        }
+
+        .vote__shelf-spacer-2 {
+          flex-grow: 0;
+          flex-basis: 48px;
+        }
+
+        .vote__shelf-spacer-3 {
+          flex-grow: 1;
+        }
+      }
+    }
   }
 }
 </style>
