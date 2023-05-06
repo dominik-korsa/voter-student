@@ -47,11 +47,17 @@
       <div class="vote__shelf-spacer-1" />
       <podium
         :active="dragging"
-        :cards="podiumCards"
+        :first-card="selections.first"
+        :second-card="selections.second"
+        :third-card="selections.third"
         ref="podium"
       />
       <div class="vote__shelf-spacer-2" />
-      <stand-of-shame />
+      <stand-of-shame
+        :active="dragging"
+        :card="selections.negative"
+        ref="standOfShame"
+      />
       <div class="vote__shelf-spacer-3" />
     </div>
   </div>
@@ -63,7 +69,7 @@ import {computedEager, templateRef, useVibrate, useWindowSize} from "@vueuse/cor
 import {computed, reactive, ref, watch} from "vue";
 import CardSlot from "../components/CardSlot.vue";
 import {logicOr, not} from "@vueuse/math";
-import {CardReference} from "../types";
+import {CardReference, Pos} from "../types";
 import DraggableCard from "../components/DraggableCard.vue";
 import {useWindowScrollEnd} from "../composables/windows-scroll-end";
 import {range} from "../utils";
@@ -72,15 +78,27 @@ import StandOfShame from "../components/StandOfShame.vue";
 import {useLatch} from "../composables/latch";
 import {useCapacitor} from "../composables/capacitor";
 
+const slotNames = ['first', 'second', 'third', 'negative'] as const;
+type SlotName = typeof slotNames[number];
+
 const { vibrate } = useVibrate({ pattern: 50 });
 
 const podium = templateRef<InstanceType<typeof Podium>>('podium');
+const standOfShame = templateRef<InstanceType<typeof StandOfShame>>('standOfShame');
 
 const draggedCards = reactive(new Set<number>());
 const dragging = computedEager(() => draggedCards.size > 0);
-const podiumCards = ref<(CardReference | null)[]>([null, null, null]);
 
-const podiumCardsSet = computed(() => podiumCards.value.every((el) => el !== null));
+const selections = reactive<Record<SlotName, CardReference | null>>({
+  first: null,
+  second: null,
+  third: null,
+  negative: null,
+});
+
+const podiumCardsSet = computed(() =>
+    selections.first !== null && selections.second !== null && selections.third !== null
+);
 const showStandOfShame = ref(false);
 const standOfShameAllowed = useLatch(not(useCapacitor(
     logicOr(
@@ -91,20 +109,31 @@ const standOfShameAllowed = useLatch(not(useCapacitor(
 )));
 const prevHidden = computed(() => !showStandOfShame.value);
 const nextHidden = computed(
-  () => !standOfShameAllowed.value || showStandOfShame.value || !podiumCardsSet.value,
+  () => showStandOfShame.value || (selections.negative === null && !(standOfShameAllowed.value && podiumCardsSet.value)),
 );
+
+const isPodiumVisible = () => isDesktop.value || !showStandOfShame.value;
+const isStandOfShameVisible = () => isDesktop.value
+    ? standOfShameAllowed.value
+    : showStandOfShame.value;
+
+const getHovered = (pos: Pos): SlotName | null => {
+    if (isPodiumVisible()) {
+        const hovered = podium.value.getHovered(pos);
+        if (hovered !== null) return hovered;
+    }
+    if (isStandOfShameVisible() && standOfShame.value.isHovered(pos)) return 'negative';
+    return null;
+}
 
 const onDragStart = (card: CardReference) => { draggedCards.add(card.number); };
 const onDragEnd = (card: CardReference) => { draggedCards.delete(card.number); };
 const onDragMove = (card: CardReference, event: PointerEvent) => {
-    const hovered = podium.value.getHovered(event);
-    const newCards = podiumCards.value.map((current, index): CardReference | null => {
-        if (hovered === index && current === null) return card;
-        if (hovered !== index && current?.number === card.number) return null;
-        return current;
+    const hovered = getHovered(event);
+    slotNames.forEach((key) => {
+        if (key === hovered && selections[key] === null) selections[key] = card;
+        if (key !== hovered && selections[key]?.number === card.number) selections[key] = null;
     });
-    if (newCards.every((el, index) => el?.number === podiumCards.value[index]?.number)) return;
-    podiumCards.value = newCards;
 }
 
 const scrollEnd = useWindowScrollEnd(60);
@@ -119,13 +148,14 @@ const revealPodium = logicOr(scrollEnd, dragging);
 const cardNumbers = range(1, 100);
 const cards = computedEager(() => {
     const dockedNumbers = new Set<number>();
-    podiumCards.value.forEach((card) => {
-        if (!card) return;
-        dockedNumbers.add(card.number);
+    slotNames.forEach((key) => {
+      const card = selections[key];
+      if (card === null) return;
+      dockedNumbers.add(card.number);
     });
     return cardNumbers.map((number) => ({
-        number,
-        docked: dockedNumbers.has(number),
+      number,
+      docked: dockedNumbers.has(number),
     }));
 });
 </script>

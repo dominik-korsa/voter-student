@@ -5,7 +5,7 @@
       ref="second"
       label="3 punkty"
       :active="active"
-      :card="cards[1]"
+      :card="secondCard"
     >
       Przeciągnij tutaj logo, któremu dajesz <b>3&nbsp;punkty</b>
     </podium-stand>
@@ -14,7 +14,7 @@
       label="5 punktów"
       :active="active"
       ref="first"
-      :card="cards[0]"
+      :card="firstCard"
     >
       Przeciągnij tutaj logo, któremu dajesz <b>5&nbsp;punktów</b>
     </podium-stand>
@@ -23,7 +23,7 @@
       label="1 punkt"
       :active="active"
       ref="third"
-      :card="cards[2]"
+      :card="thirdCard"
     >
       Przeciągnij tutaj logo, któremu dajesz <b>1&nbsp;punkt</b>
     </podium-stand>
@@ -39,18 +39,33 @@ import PodiumStand from "./PodiumStand.vue";
 
 defineProps({
   active: Boolean,
-  cards: {
-    type: Array as PropType<(CardReference | null)[]>,
-    required: true,
+  firstCard: {
+    type: Object as PropType<CardReference | null>,
+    required: false,
+    default: null,
+  },
+  secondCard: {
+      type: Object as PropType<CardReference | null>,
+      required: false,
+      default: null,
+  },
+  thirdCard: {
+      type: Object as PropType<CardReference | null>,
+      required: false,
+      default: null,
   },
 });
 
-const slots = ['first', 'second', 'third'].map((key) => templateRef<InstanceType<typeof PodiumStand>>(key));
+type PodiumStand = InstanceType<typeof PodiumStand>;
+const first = templateRef<PodiumStand>('first');
+const second = templateRef<PodiumStand>('second');
+const third = templateRef<PodiumStand>('third');
 
-const getHovered = (pos: Pos): number | null => {
-    const index = slots.findIndex((slot) => isInside(slot.value.targetEl, pos));
-    if (index === -1) return null;
-    return index;
+const getHovered = (pos: Pos): 'first' | 'second' | 'third' | null => {
+    if (isInside(first.value.targetEl, pos)) return 'first';
+    if (isInside(second.value.targetEl, pos)) return 'second';
+    if (isInside(third.value.targetEl, pos)) return 'third';
+    return null;
 }
 defineExpose({ getHovered });
 </script>
