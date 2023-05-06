@@ -29,7 +29,7 @@ defineProps({
     },
     active: Boolean,
     card: {
-        type: Object as PropType<CardReference>,
+        type: Object as PropType<CardReference | null>,
         required: false,
         default: null,
     },
