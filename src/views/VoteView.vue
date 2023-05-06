@@ -228,19 +228,36 @@ const cards = computedEager(() => {
   }
 
   .vote__shelf {
+    @keyframes shelf-reveal {
+      from {
+        min-height: 100%;
+      }
+      to {
+        min-height: 100px;
+      }
+    }
+
+    @keyframes podium-reveal {
+      from {
+        transform: translateY(180px);
+      }
+    }
+
     position: fixed;
     bottom: 0;
     width: 100%;
-    background: $background;
+    background: $yellow;
     padding-top: 8px;
     box-shadow: 0 0 0 3px #0003;
     display: flex;
     overflow: hidden;
+    animation: shelf-reveal 800ms ease-out 400ms backwards;
 
     .podium {
       width: 100%;
       flex-shrink: 0;
       transition: margin-left 300ms;
+      animation: podium-reveal 600ms ease-out 900ms backwards;
     }
 
     .stand-of-shame {
