@@ -1,0 +1,53 @@
+@import "../assets/constants";
+
+.card {
+  width: var(--card-width);
+  padding: $card-padding;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 3px 3px #0003;
+  user-select: none;
+  cursor: grab;
+  transition: transform 150ms, box-shadow 150ms, top 300ms, left 300ms;
+  touch-action: manipulation;
+
+  &.card--hoverable:hover, &.card--raised {
+    transform: scale(105%);
+    box-shadow: 5px 5px #0003;
+  }
+
+  &.card--dragged {
+    transition: transform 150ms, box-shadow 150ms;
+    cursor: grabbing;
+    touch-action: none;
+  }
+
+  &.card--raised {
+    z-index: 10;
+  }
+
+  &.card--disabled {
+    cursor: default;
+    box-shadow: 2px 2px #0003;
+    background: repeating-linear-gradient(
+      -60deg,
+      #eee 0 10px,
+      #ddd 10px 15px
+    );
+    color: #0008;
+  }
+
+  &.card--hidden {
+    visibility: hidden;
+  }
+
+  .card-footer {
+    text-align: center;
+    line-height: $card-line-height;
+    height: $card-line-height;
+    white-space: nowrap;
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+}

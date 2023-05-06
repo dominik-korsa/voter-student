@@ -1,0 +1,19 @@
+@import "constants";
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: $background;
+  font-family: 'Space Grotesk', sans-serif;
+  color: black;
+  line-height: 1.6;
+  font-size: 1rem;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: none;
+}
+
+:root {
+  --card-width: min(128px, calc((100vw - #{$card-gap * 4} - 24px) / 3));
+}
