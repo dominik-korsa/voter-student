@@ -11,14 +11,17 @@
 <style lang="scss">
 @import "../assets/constants";
 
+.page--code body {
+  background: $yellow;
+}
+
 .code {
   display: flex;
-  height: 100vh;
+  min-height: v-bind(height);
   width: 100%;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  background: $yellow;
 
   .label {
     margin-bottom: 8px;
@@ -62,8 +65,14 @@
 import {type MaskaDetail, type MaskOptions, type MaskTokens, vMaska} from "maska";
 import {computed, ref} from "vue";
 import {useRouter} from "vue-router";
+import {useHTMLClass} from "../composables/html-class";
+import {useWindowSize} from "@vueuse/core";
 
 const router = useRouter();
+useHTMLClass('page--code');
+
+const windowSize = useWindowSize();
+const height = computed(() => `${windowSize.height.value - 0.1}px`);
 
 const tokens: MaskTokens = {
   'Z': {
