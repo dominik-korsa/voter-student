@@ -1,5 +1,5 @@
 [[redirects]]
-from = "https://voter.netlify.app/*"
+from = "https://voter-student.netlify.app/*"
 to = "https://voter.dk-gl.eu/:splat"
 force = true
 status = 301
