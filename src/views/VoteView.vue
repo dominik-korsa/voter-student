@@ -27,17 +27,17 @@
     <div class="vote__overlay" />
       <floating-button
         class="vote__button vote__button--prev"
-        :disable="isDesktop || prevHidden"
+        :disable="!prevVisible"
         @click="showStandOfShame = false"
       >
       👈 Wstecz
     </floating-button>
     <floating-button
       class="vote__button vote__button--next"
-      :disable="isDesktop || nextHidden"
-      @click="showStandOfShame = true"
+      :disable="!nextVisible"
+      @click="onNext"
     >
-        Dalej 👉
+      Dalej 👉
     </floating-button>
     <div
       class="vote__shelf"
@@ -100,6 +100,10 @@ const selections = reactive<Record<SlotName, CardReference | null>>({
 const podiumCardsSet = computed(() =>
     selections.first !== null && selections.second !== null && selections.third !== null
 );
+const allCardsSet = computed(
+    () => podiumCardsSet.value && selections.negative !== null
+);
+const confirmAllowed = useLatch(not(useCapacitor(not(allCardsSet), 750)));
 const showStandOfShame = ref(false);
 const standOfShameAllowed = useLatch(not(useCapacitor(
     logicOr(
@@ -108,10 +112,12 @@ const standOfShameAllowed = useLatch(not(useCapacitor(
     ),
     750,
 )));
-const prevHidden = computed(() => !showStandOfShame.value);
-const nextHidden = computed(
-  () => showStandOfShame.value || (selections.negative === null && !(standOfShameAllowed.value && podiumCardsSet.value)),
-);
+const prevVisible = computed(() => !isDesktop.value && showStandOfShame.value);
+const nextVisible = computed(() => (allCardsSet.value && confirmAllowed.value) || (
+    !isDesktop.value
+    && !showStandOfShame.value
+    && (selections.negative !== null || (standOfShameAllowed.value && podiumCardsSet.value))
+));
 
 const isPodiumVisible = () => isDesktop.value || !showStandOfShame.value;
 const isStandOfShameVisible = () => isDesktop.value
@@ -141,6 +147,15 @@ const onReset = (card: CardReference) => {
         if (selections[key]?.number === card.number) selections[key] = null;
     });
 }
+
+const onNext = () => {
+    if (isDesktop.value || showStandOfShame.value) {
+        if (!allCardsSet.value) return;
+        console.log('Go to confirm screen');
+    } else {
+      showStandOfShame.value = true;
+    }
+};
 
 const scrollEnd = useWindowScrollEnd(60);
 watch(() => scrollEnd.value, () => {
