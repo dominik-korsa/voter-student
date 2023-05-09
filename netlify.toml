@@ -6,7 +6,7 @@ status = 301
 
 [[redirects]]
 from = "/admin/*"
-to = "https://voter-admin.dk-gl.eu/admin/:splat"
+to = "https://voter-admin.dk-gl.eu/:splat"
 force = true
 status = 200
 
