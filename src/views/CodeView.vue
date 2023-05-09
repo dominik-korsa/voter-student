@@ -5,6 +5,10 @@
     <div class="error" :class="{
       'error--visible': errorVisible,
     }">Błędny kod</div>
+
+    <a href="/admin/" class="code__admin-link">
+      Zaloguj się jako administrator
+    </a>
   </div>
 </template>
 
@@ -58,6 +62,11 @@
       opacity: 0;
     }
   }
+
+  .code__admin-link {
+    margin-top: 24px;
+    font-size: 0.9em;
+  }
 }
 </style>
 
@@ -88,7 +97,7 @@ const options: MaskOptions = {
 const code = ref('');
 const validCode = 'abcd2137';
 const errorVisible = computed(() => {
-  return code.value.length == 10 && code.value !== validCode;
+  return code.value.length == 8 && code.value !== validCode;
 });
 
 const onMaska = (event: CustomEvent<MaskaDetail>) => {

@@ -14,6 +14,10 @@ const router = createRouter({
       name: 'vote',
       component: () => import('../views/VoteView.vue')
     },
+    {
+      path: '/:catchAll(.*)*',
+      redirect: '/',
+    }
   ]
 })
 
