@@ -6,7 +6,7 @@ status = 301
 
 [[redirects]]
 from = "/admin/*"
-to = "https://voter-admin.dk-gl.eu/:splat"
+to = "https://voter-admin.netlify.app/:splat"
 force = true
 status = 200
 
