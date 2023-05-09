@@ -47,12 +47,12 @@ import {LoadingErrorType} from "../types";
 import {delay} from "../utils";
 
 const props = defineProps<{
-    initialToken: string | undefined;
-    initialLoadingError: LoadingErrorType | undefined;
+    initialToken: string | null;
+    initialLoadingError: LoadingErrorType | null;
     checkToken: (token: string) => Promise<LoadingErrorType | null>;
 }>();
 
-const errorType = ref(props.initialLoadingError ?? null);
+const errorType = ref(props.initialLoadingError);
 const token = ref(props.initialToken ?? '');
 
 const errorMessage = ref(':)');
