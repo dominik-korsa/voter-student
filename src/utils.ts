@@ -32,3 +32,16 @@ export const isInside = (el: HTMLElement, pos: Pos) => {
 }
 
 export const delay = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));
+
+export const createRandomString = (length: number, characterSet = 'abcdefghijklmnopqrstuvwxyz0123456789') => {
+    let result = '';
+    while (length--) {
+        result += characterSet[Math.floor(Math.random() * characterSet.length)];
+    }
+    return result;
+}
+export const createRandomToken = () => {
+    if (Math.random() < 0.01) return '¯\\_(ツ)_/¯';
+    if (Math.random() < 0.01) return 'good-lood';
+    return `${createRandomString(4)}-${createRandomString(4)}`;
+};

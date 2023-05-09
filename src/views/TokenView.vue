@@ -10,6 +10,7 @@
       class="input-wrapper"
       :class="{
         'input-wrapper--loading': loading,
+        'input-wrapper--narrow-placeholder': placeholder === '¯\\_(ツ)_/¯',
       }"
     >
       <input
@@ -21,6 +22,7 @@
         autocapitalize="none"
         @maska="onMaska"
         :readonly="completed"
+        :placeholder="placeholder"
       />
       <div class="input-wrapper__loading" />
     </div>
@@ -40,11 +42,11 @@
 </template>
 
 <script lang="ts" setup>
-import {MaskaDetail, type MaskOptions, type MaskTokens, vMaska} from "maska";
+import {MaskaDetail, type MaskOptions, vMaska} from "maska";
 import {computed, ref} from "vue";
-import {refAutoReset, useWindowSize, watchImmediate} from "@vueuse/core";
+import {refAutoReset, useIntervalFn, useWindowSize, watchImmediate} from "@vueuse/core";
 import {LoadingErrorType} from "../types";
-import {delay} from "../utils";
+import {createRandomToken, delay} from "../utils";
 
 const props = defineProps<{
     initialToken: string | null;
@@ -68,18 +70,23 @@ watchImmediate(errorType, (value) => {
 const windowSize = useWindowSize();
 const height = computed(() => `${windowSize.height.value - 0.1}px`);
 
-const tokens: MaskTokens = {
-    'Z': {
-        pattern: /[a-zA-Z\d]/, transform: (chr: string) => chr.toLowerCase(),
-    }
-}
-
 const maskOptions: MaskOptions = {
     mask: 'ZZZZ-ZZZZ',
-    tokens,
+    tokens: {
+        'Z': {
+            pattern: /[a-zA-Z\d]/, transform: (chr: string) => chr.toLowerCase(),
+        }
+    },
 }
 
+const placeholder = ref('');
+useIntervalFn(() => {
+  placeholder.value = createRandomToken();
+}, 6000, { immediateCallback: true });
+
 const loading = ref(false);
+let queuedCheck: string | null = null;
+const completed = refAutoReset(false, 5000);
 
 const check = async (value: string) => {
     return await props.checkToken(value).catch((error) => {
@@ -87,9 +94,6 @@ const check = async (value: string) => {
         return 'other-error' as const;
     });
 }
-
-let queuedCheck: string | null = null;
-const completed = refAutoReset(false, 5000);
 
 const onChange = async (value: string) => {
   queuedCheck = value;
@@ -167,9 +171,18 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
       border-radius: $border-radius;
       outline: none;
       font-family: 'Space Mono', monospace;
+      font-variant-ligatures: none;
       box-shadow: 4px 4px #0003;
       border: 1px solid #ccc;
       line-height: 1.2;
+
+      &::placeholder {
+        color: #00000015;
+      }
+    }
+
+    &.input-wrapper--narrow-placeholder input::placeholder {
+      letter-spacing: -0.04em;
     }
 
     @keyframes inputBackground {
