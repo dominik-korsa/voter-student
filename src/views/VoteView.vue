@@ -78,6 +78,7 @@ import StandOfShame from "../components/StandOfShame.vue";
 import {useLatch} from "../composables/latch";
 import {useCapacitor} from "../composables/capacitor";
 import {SystemInfoValid} from "../api/types";
+import {useHTMLClass} from "../composables/html-class";
 
 const props = defineProps<{
     systemInfo: SystemInfoValid;
@@ -87,6 +88,7 @@ const slotNames = ['first', 'second', 'third', 'negative'] as const;
 type SlotName = typeof slotNames[number];
 
 const { vibrate } = useVibrate({ pattern: 50 });
+useHTMLClass('page--vote');
 
 const podium = templateRef<InstanceType<typeof Podium>>('podium');
 const standOfShame = templateRef<InstanceType<typeof StandOfShame>>('standOfShame');
@@ -186,6 +188,10 @@ const cards = computedEager(() => {
 
 <style lang="scss">
 @import "../assets/constants";
+
+html.page--vote body {
+  background: $yellow-dark;
+}
 
 .vote {
   user-select: none;

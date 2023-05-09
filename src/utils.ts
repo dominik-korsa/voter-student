@@ -30,3 +30,5 @@ export const isInside = (el: HTMLElement, pos: Pos) => {
     const elementY = pos.y - rect.top;
     return elementX >= 0 && elementX <= rect.width && elementY >= 0 && elementY <= rect.width;
 }
+
+export const delay = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));

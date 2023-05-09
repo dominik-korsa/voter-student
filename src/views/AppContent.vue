@@ -19,6 +19,7 @@ import {defineAsyncComponent, defineComponent, ref} from "vue";
 import {usePath} from "../composables/path";
 import {LoadingErrorType} from "../types";
 import {getSystemInfo, getSystemInfoWithToken} from "../api";
+import {useTimeoutFn} from "@vueuse/core";
 
 const TokenView = defineAsyncComponent(() => import('./TokenView.vue'));
 const VotingDisabledView = defineAsyncComponent(() => import('./VotingDisabledView.vue'));
@@ -44,6 +45,7 @@ const loadInitial = async () => {
         initialLoadingError,
         initialToken: token,
         systemInfo: ref(typeof result === 'object' ? result : null),
+        replacePath,
     }
 }
 
@@ -55,6 +57,7 @@ export default defineComponent({
             initialLoadingError,
             initialToken,
             systemInfo,
+            replacePath,
         } = await loadInitial();
 
         return {
@@ -67,17 +70,27 @@ export default defineComponent({
                     console.error(error);
                     return 'other-error' as const;
                 });
+
+                if (result === 'reset' || result === 'token-not-found') replacePath(null);
+                else replacePath(token);
+
                 if (result === 'reset' || result === 'not-voting') {
-                    votingDisabled.value = true;
+                    useTimeoutFn(() => {
+                        votingDisabled.value = true;
+                    }, 750);
                     return null;
                 }
+
                 votingDisabled.value = false;
-                if (typeof result !== 'string') {
+                if (result === 'token-not-found') return 'token-not-found';
+                if (result === 'other-error') return 'other-error';
+                if (result === 'token-used') return 'token-used';
+
+                useTimeoutFn(() => {
                     systemInfo.value = result;
-                    return null;
-                }
-                return result;
-            }
+                }, 750);
+                return null;
+            },
         }
     },
 });

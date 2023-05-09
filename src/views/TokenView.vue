@@ -1,14 +1,29 @@
 <template>
-  <div class="token">
+  <div
+    class="token"
+    :class="{
+      'token--completed': completed,
+    }"
+  >
     <div class="label">Podaj kod dostępu:</div>
-    <input
-      v-model="token"
-      type="text"
-      v-maska:[maskOptions]
-      autofocus
-      autocomplete="off"
-      autocapitalize="none"
-    />
+    <div
+      class="input-wrapper"
+      :class="{
+        'input-wrapper--loading': loading,
+      }"
+    >
+      <input
+        v-model="token"
+        type="text"
+        v-maska:[maskOptions]
+        autofocus
+        autocomplete="off"
+        autocapitalize="none"
+        @maska="onMaska"
+        :readonly="completed"
+      />
+      <div class="input-wrapper__loading" />
+    </div>
     <div
       class="error"
       :class="{
@@ -24,12 +39,89 @@
   </div>
 </template>
 
+<script lang="ts" setup>
+import {MaskaDetail, type MaskOptions, type MaskTokens, vMaska} from "maska";
+import {computed, ref} from "vue";
+import {refAutoReset, useWindowSize, watchImmediate} from "@vueuse/core";
+import {LoadingErrorType} from "../types";
+import {delay} from "../utils";
+
+const props = defineProps<{
+    initialToken: string | undefined;
+    initialLoadingError: LoadingErrorType | undefined;
+    checkToken: (token: string) => Promise<LoadingErrorType | null>;
+}>();
+
+const errorType = ref(props.initialLoadingError ?? null);
+const token = ref(props.initialToken ?? '');
+
+const errorMessage = ref(':)');
+watchImmediate(errorType, (value) => {
+    if (value === null) return;
+    errorMessage.value = {
+        'token-not-found': 'Nie znaleziono kodu',
+        'token-used': 'Kod został już wykorzystany',
+        'other-error': 'Wystąpił nieoczekiwany błąd',
+    }[value];
+});
+
+const windowSize = useWindowSize();
+const height = computed(() => `${windowSize.height.value - 0.1}px`);
+
+const tokens: MaskTokens = {
+    'Z': {
+        pattern: /[a-zA-Z\d]/, transform: (chr: string) => chr.toLowerCase(),
+    }
+}
+
+const maskOptions: MaskOptions = {
+    mask: 'ZZZZ-ZZZZ',
+    tokens,
+}
+
+const loading = ref(false);
+
+const check = async (value: string) => {
+    return await props.checkToken(value).catch((error) => {
+        console.error(error);
+        return 'other-error' as const;
+    });
+}
+
+let queuedCheck: string | null = null;
+const completed = refAutoReset(false, 5000);
+
+const onChange = async (value: string) => {
+  queuedCheck = value;
+  if (loading.value || completed.value) return;
+  loading.value = true;
+  while (queuedCheck !== null) {
+      const val = queuedCheck;
+      queuedCheck = null;
+      const [result] = await Promise.all([
+          check(val),
+          delay(200),
+      ]);
+      if (queuedCheck === null) errorType.value = result;
+      if (result === null) {
+          queuedCheck = null;
+          completed.value = true;
+      }
+  }
+  loading.value = false;
+};
+
+let lastValue = '';
+const onMaska = (event: CustomEvent<MaskaDetail>) => {
+    if (event.detail.masked === lastValue) return;
+    lastValue = event.detail.masked;
+    errorType.value = null;
+    if (event.detail.completed) onChange(lastValue);
+};
+</script>
+
 <style lang="scss">
 @import "../assets/constants";
-
-.page--token body {
-  background: $yellow;
-}
 
 .token {
   display: flex;
@@ -38,6 +130,11 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  transition: opacity 500ms;
+
+  &.token--completed {
+    opacity: 0;
+  }
 
   .label {
     margin-bottom: 8px;
@@ -45,21 +142,79 @@
     color: #000c;
   }
 
-  input {
-    font-size: 3rem;
-    width: 5.5em;
-    border: none;
-    background: white;
-    color: #000;
-    padding: 6px;
-    border-radius: 8px;
-    box-shadow: 3px 3px #0003;
-    outline: none;
-    transition: box-shadow 250ms;
-    font-family: 'Space Mono', monospace;
+  $loading-transition: 150ms;
+  $loading-height: 8px;
+  $border-radius: 8px;
 
-    &:focus {
+  .input-wrapper {
+    border-radius: $border-radius;
+    overflow: hidden;
+    box-shadow: 3px 3px #0003;
+    transition: box-shadow 200ms, transform 200ms, margin-bottom $loading-transition;
+    margin-bottom: $loading-height;
+
+    &:focus-within {
       box-shadow: 5px 5px #0003;
+      transform: scale(102%);
+    }
+
+    input {
+      font-size: 3rem;
+      width: 5.5em;
+      background: white;
+      color: #000;
+      padding: 10px 8px;
+      border-radius: $border-radius;
+      outline: none;
+      font-family: 'Space Mono', monospace;
+      box-shadow: 4px 4px #0003;
+      border: 1px solid #ccc;
+      line-height: 1.2;
+    }
+
+    @keyframes inputBackground {
+      from {
+        background-position-x: -58px;
+      }
+      to {
+        background-position-x: 0;
+      }
+    }
+
+    .input-wrapper__loading {
+      height: 16px;
+      margin-top: -16px;
+      margin-left: 1px;
+      margin-right: 1px;
+      border-bottom-left-radius: $border-radius;
+      border-bottom-right-radius: $border-radius;
+      transition: margin-top $loading-transition;
+      overflow: hidden;
+
+      &:before {
+        content: ' ';
+        display: block;
+        width: 150%;
+        height: 100%;
+        background: repeating-linear-gradient(
+          -60deg,
+          $green 0 20px,
+          #00A37D 20px 25px
+        );
+          animation: inputBackground 1.5s infinite linear;
+      }
+    }
+
+    &.input-wrapper--loading {
+      margin-bottom: 0;
+
+      &:focus-within {
+        box-shadow: 5px 4px #0003;
+      }
+
+      .input-wrapper__loading {
+        margin-top: -16px + $loading-height;
+      }
     }
   }
 
@@ -81,49 +236,3 @@
   }
 }
 </style>
-
-<script lang="ts" setup>
-import {type MaskOptions, type MaskTokens, vMaska} from "maska";
-import {computed, ref, watch} from "vue";
-import {useHTMLClass} from "../composables/html-class";
-import {useWindowSize, watchImmediate} from "@vueuse/core";
-import {LoadingErrorType} from "../types";
-
-useHTMLClass('page--token');
-
-const props = defineProps<{
-    initialToken: string | undefined;
-    initialLoadingError: LoadingErrorType | undefined;
-    checkToken: (token: string) => Promise<LoadingErrorType | null>;
-}>();
-
-const errorType = ref(props.initialLoadingError ?? null);
-const token = ref(props.initialToken ?? '');
-
-const errorMessage = ref('');
-watchImmediate(errorType, (value) => {
-    if (value === null) return;
-    errorMessage.value = {
-        'token-not-found': 'Nie znaleziono kodu',
-        'token-used': 'Kod został już wykorzystany',
-        'other-error': 'Wystąpił nieoczekiwany błąd',
-    }[value];
-});
-watch(token, () => {
-   errorType.value = null;
-});
-
-const windowSize = useWindowSize();
-const height = computed(() => `${windowSize.height.value - 0.1}px`);
-
-const tokens: MaskTokens = {
-  'Z': {
-    pattern: /[a-zA-Z\d]/, transform: (chr: string) => chr.toLowerCase(),
-  }
-}
-
-const maskOptions: MaskOptions = {
-  mask: 'ZZZZ-ZZZZ',
-  tokens,
-}
-</script>
