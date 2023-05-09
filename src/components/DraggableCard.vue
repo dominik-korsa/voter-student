@@ -41,15 +41,23 @@ const emit = defineEmits<{
     (e: 'begin-dragging', card: CardReference): void;
     (e: 'end-dragging', card: CardReference): void;
     (e: 'dragging-move', card: CardReference, event: PointerEvent): void;
+    (e: 'reset', card: CardReference): void;
 }>()
 
 const wrapperEl = ref<HTMLDivElement>();
 const el = ref<HTMLDivElement>();
 
-const { dragged, getStyle, startNow } = useDragged(el, wrapperEl, (event) => {
-    emit('dragging-move', cardReference, event);
-});
-const draggedRaised = useCapacitor(dragged, 300);
+const { dragged, moving, getStyle, startNow, reset } = useDragged(
+    el,
+    wrapperEl,
+    (event) => {
+        emit('dragging-move', cardReference, event);
+    },
+    () => {
+        emit('reset', cardReference);
+    },
+);
+const draggedRaised = useCapacitor(moving, 300);
 const raised = logicOr(
     draggedRaised,
     useNonTouchHover(el),
@@ -59,6 +67,7 @@ const cardReference: CardReference = reactive({
   number: computedEager(() => props.number),
   raised: dragged,
   startDrag: startNow,
+  reset,
 });
 
 watchImmediate(dragged, (value) => {

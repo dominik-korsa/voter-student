@@ -19,6 +19,7 @@
             @begin-dragging="onDragStart"
             @end-dragging="onDragEnd"
             @dragging-move="onDragMove"
+            @reset="onReset"
           />
         </template>
       </card-slot>
@@ -133,6 +134,11 @@ const onDragMove = (card: CardReference, event: PointerEvent) => {
     slotNames.forEach((key) => {
         if (key === hovered && selections[key] === null) selections[key] = card;
         if (key !== hovered && selections[key]?.number === card.number) selections[key] = null;
+    });
+}
+const onReset = (card: CardReference) => {
+    slotNames.forEach((key) => {
+        if (selections[key]?.number === card.number) selections[key] = null;
     });
 }
 

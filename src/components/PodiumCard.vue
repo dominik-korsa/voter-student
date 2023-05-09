@@ -27,9 +27,14 @@ export default defineComponent({
     },
     setup: (props) => {
         const el = templateRef<HTMLElement>('el');
+        const getOffset = () => getGlobalOffset(el.value);
         return {
             onPointerDown: (event: PointerEvent) => {
-                props.card.startDrag(() => getGlobalOffset(el.value), event);
+                if (event.shiftKey) {
+                    props.card.reset(getOffset());
+                    return;
+                }
+                props.card.startDrag(getOffset, event);
             }
         }
     }

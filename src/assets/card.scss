@@ -12,7 +12,7 @@
   transition: transform 150ms, box-shadow 150ms, top 300ms, left 300ms;
   touch-action: manipulation;
 
-  &.card--hoverable:hover, &.card--raised {
+  &.card--hoverable:hover, &.card--raised, &.card--hidden {
     transform: scale(105%);
     box-shadow: 5px 5px #0003;
   }

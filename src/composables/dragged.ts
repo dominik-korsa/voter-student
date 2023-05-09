@@ -1,5 +1,5 @@
 import {onBeforeUnmount, ref, Ref, StyleValue} from "vue";
-import {computedEager, useEventListener, useVibrate} from "@vueuse/core";
+import {computedEager, refAutoReset, useEventListener, useVibrate} from "@vueuse/core";
 import {Offset, StatePointer} from "../types";
 
 interface IdleState {
@@ -25,13 +25,20 @@ export const useDragged = (
     cardEl: Ref<HTMLElement | undefined>,
     parentEl: Ref<HTMLElement | undefined>,
     onMove: (event: PointerEvent) => void,
+    onReset: () => void,
 ) => {
     const { vibrate } = useVibrate({pattern: 40});
 
     const state = ref<State>({ type: 'idle' });
+    const resetOffset = refAutoReset<Offset | null>(null, 10);
 
     const getStyle = (): StyleValue => {
         if (!parentEl.value) return {};
+        if (resetOffset.value !== null) return {
+            position: 'absolute',
+            left: `${resetOffset.value.left}px`,
+            top: `${resetOffset.value.top}px`,
+        }
         if (state.value.type !== 'dragging') return {
             position: 'absolute',
             left: `${parentEl.value.offsetLeft}px`,
@@ -86,6 +93,10 @@ export const useDragged = (
         if (state.value.type === 'waiting') clearTimeout(state.value.timeoutId);
         state.value = { type: 'idle' };
     };
+    const reset = (offset: Offset) => {
+        resetOffset.value = offset;
+        onReset();
+    }
 
     onBeforeUnmount(() => { cancel(); });
 
@@ -114,11 +125,14 @@ export const useDragged = (
         onMove(event);
     }, { passive: true });
 
+    let dragged = computedEager(() => state.value.type === 'dragging');
     return {
-        dragged: computedEager(() => state.value.type === 'dragging'),
+        dragged,
+        moving: computedEager(() => dragged.value || resetOffset.value !== null),
         getStyle,
         startDelayed,
         startNow,
         start,
+        reset,
     };
 }

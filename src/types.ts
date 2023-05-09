@@ -11,6 +11,7 @@ export interface CardReference {
   number: number;
   raised: boolean;
   startDrag: (getOffset: () => Offset, pointer: StatePointer) => void;
+  reset: (offset: Offset) => void;
 }
 
 export interface Offset {
