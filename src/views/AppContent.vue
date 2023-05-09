@@ -1,0 +1,84 @@
+<template>
+    <voting-disabled-view
+        v-if="votingDisabled"
+    />
+    <token-view
+        v-else-if="systemInfo === null"
+        :initial-token="initialToken"
+        :initial-loading-error="initialLoadingError"
+        :check-token="checkToken"
+    />
+    <vote-view
+        :system-info="systemInfo"
+        v-else
+    />
+</template>
+
+<script lang="ts">
+import {defineAsyncComponent, defineComponent, ref} from "vue";
+import {usePath} from "../composables/path";
+import {LoadingErrorType} from "../types";
+import {getSystemInfo, getSystemInfoWithToken} from "../api";
+
+const TokenView = defineAsyncComponent(() => import('./TokenView.vue'));
+const VotingDisabledView = defineAsyncComponent(() => import('./VotingDisabledView.vue'));
+const VoteView = defineAsyncComponent(() => import('./VoteView.vue'));
+
+const loadInitial = async () => {
+    const { token, replacePath } = usePath();
+
+    const result = await getSystemInfo(token).catch((error) => {
+        console.error(error);
+        return 'other-error' as const;
+    });
+
+    const votingDisabled = ref(result === 'reset' || result === 'not-voting');
+
+    if (result === 'reset') replacePath(null);
+    const initialLoadingError: LoadingErrorType | null = (
+        result === 'token-used' || result === 'token-not-found' || result === 'other-error'
+    ) ? result : null;
+
+    return {
+        votingDisabled,
+        initialLoadingError,
+        initialToken: token,
+        systemInfo: ref(typeof result === 'object' ? result : null),
+    }
+}
+
+export default defineComponent({
+    components: {VoteView, VotingDisabledView, TokenView},
+    setup: async () => {
+        const {
+            votingDisabled,
+            initialLoadingError,
+            initialToken,
+            systemInfo,
+        } = await loadInitial();
+
+        return {
+            votingDisabled,
+            initialToken,
+            initialLoadingError,
+            systemInfo,
+            checkToken: async (token: string): Promise<LoadingErrorType | null> => {
+                const result = await getSystemInfoWithToken(token).catch((error) => {
+                    console.error(error);
+                    return 'other-error' as const;
+                });
+                if (result === 'reset' || result === 'not-voting') {
+                    votingDisabled.value = true;
+                    return null;
+                }
+                votingDisabled.value = false;
+                if (typeof result !== 'string') {
+                    systemInfo.value = result;
+                    return null;
+                }
+                return result;
+            }
+        }
+    },
+});
+</script>

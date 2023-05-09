@@ -11,9 +11,9 @@
   "dependencies": {
     "@vueuse/core": "^10.1.2",
     "@vueuse/math": "^10.1.2",
+    "axios": "^1.4.0",
     "maska": "^2.1.9",
-    "vue": "^3.2.47",
-    "vue-router": "^4.1.6"
+    "vue": "^3.2.47"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.1.0",

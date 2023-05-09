@@ -18,3 +18,5 @@ export interface Offset {
     left: number;
     top: number;
 }
+
+export type LoadingErrorType = 'token-not-found' | 'token-used' | 'other-error';

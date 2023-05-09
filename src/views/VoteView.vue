@@ -73,11 +73,15 @@ import {logicOr, not} from "@vueuse/math";
 import {CardReference, Pos} from "../types";
 import DraggableCard from "../components/DraggableCard.vue";
 import {useWindowScrollEnd} from "../composables/windows-scroll-end";
-import {range} from "../utils";
 import FloatingButton from "../components/FloatingButton.vue";
 import StandOfShame from "../components/StandOfShame.vue";
 import {useLatch} from "../composables/latch";
 import {useCapacitor} from "../composables/capacitor";
+import {SystemInfoValid} from "../api/types";
+
+const props = defineProps<{
+    systemInfo: SystemInfoValid;
+}>();
 
 const slotNames = ['first', 'second', 'third', 'negative'] as const;
 type SlotName = typeof slotNames[number];
@@ -166,7 +170,6 @@ const isDesktop = computed(() => windowSize.width.value >= 900);
 
 const revealPodium = logicOr(scrollEnd, dragging);
 
-const cardNumbers = range(1, 100);
 const cards = computedEager(() => {
     const dockedNumbers = new Set<number>();
     slotNames.forEach((key) => {
@@ -174,7 +177,7 @@ const cards = computedEager(() => {
       if (card === null) return;
       dockedNumbers.add(card.number);
     });
-    return cardNumbers.map((number) => ({
+    return props.systemInfo.availableLogos.map((number) => ({
       number,
       docked: dockedNumbers.has(number),
     }));
