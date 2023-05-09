@@ -201,16 +201,12 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
           $green 0 20px,
           #00A37D 20px 25px
         );
-          animation: inputBackground 1.5s infinite linear;
+        animation: inputBackground 1.5s infinite linear;
       }
     }
 
     &.input-wrapper--loading {
       margin-bottom: 0;
-
-      &:focus-within {
-        box-shadow: 5px 4px #0003;
-      }
 
       .input-wrapper__loading {
         margin-top: -16px + $loading-height;
