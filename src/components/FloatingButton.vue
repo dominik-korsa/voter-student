@@ -56,7 +56,7 @@ export default defineComponent({
     font-size: 0.9rem;
   }
 
-  &:hover {
+  &:not(:disabled):hover {
     box-shadow: 5px 5px #0003;
     transform: scale(105%);
   }

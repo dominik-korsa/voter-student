@@ -204,7 +204,7 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
       transition: margin-top $loading-transition;
       overflow: hidden;
 
-      &:before {
+      &::before {
         content: ' ';
         display: block;
         width: 150%;

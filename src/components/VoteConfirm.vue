@@ -3,24 +3,34 @@
     class="vote-confirm"
     :class="{
       'vote-confirm--hidden': hidden,
+      'vote-confirm--confirmed': confirmed,
     }"
   >
-    <h1 class="vote-confirm__title">Czy wszystko się zgadza?</h1>
-    <confirm-card type="first" :logo="selections.first.number" />
-    <confirm-card type="second" :logo="selections.second.number" />
-    <confirm-card type="third" :logo="selections.third.number" />
-    <confirm-card type="negative" :logo="selections.negative.number" />
-    <div class="vote-confirm__notice">
-      <b>Uwaga!</b> Po oddaniu głosu nie ma możliwości zmiany wyboru.
-    </div>
-    <div class="vote-confirm__buttons">
-      <floating-button
-        class="vote-confirm__change"
-        @click="$emit('close')"
-      >
-        👈 Zmień
-      </floating-button>
-      <floating-button class="vote-confirm__submit">Oddaj głos 🚀️</floating-button>
+    <h1 class="vote-confirm__title vote-confirm__animated vote-confirm__animated--1">Czy wszystko się zgadza?</h1>
+    <div class="vote-confirm__wrapper">
+      <confirm-card class="vote-confirm__animated vote-confirm__animated--2" type="first" :logo="selections.first.number" />
+      <confirm-card class="vote-confirm__animated vote-confirm__animated--3" type="second" :logo="selections.second.number" />
+      <confirm-card class="vote-confirm__animated vote-confirm__animated--4" type="third" :logo="selections.third.number" />
+      <confirm-card class="vote-confirm__animated vote-confirm__animated--5" type="negative" :logo="selections.negative.number" />
+      <div class="vote-confirm__notice vote-confirm__animated vote-confirm__animated--6">
+        <b>Uwaga!</b> Po oddaniu głosu nie ma możliwości zmiany wyboru.
+      </div>
+      <div class="vote-confirm__buttons vote-confirm__animated vote-confirm__animated--7">
+        <floating-button
+          class="vote-confirm__change"
+          @click="$emit('close')"
+          :disable="loading || confirmed"
+        >
+          👈 Zmień
+        </floating-button>
+        <floating-button
+          class="vote-confirm__submit"
+          @click="submit"
+          :disable="loading || confirmed"
+        >
+          Oddaj głos 🚀
+        ️</floating-button>
+      </div>
     </div>
   </div>
 </template>
@@ -31,6 +41,7 @@ import {computedEager} from "@vueuse/core";
 import {CardReference, SlotName} from "../types";
 import ConfirmCard from "./ConfirmCard.vue";
 import FloatingButton from "./FloatingButton.vue";
+import {ref} from "vue";
 
 const props = defineProps<{
   visible: boolean;
@@ -43,6 +54,22 @@ defineEmits<{
 
 const initialTimePassed = useTimePassed(50);
 const hidden = computedEager(() => !props.visible || !initialTimePassed.value);
+
+const confirmed = ref(false);
+const loading = ref(false);
+
+const submit = () => {
+  if (loading.value) return;
+  loading.value = true;
+  try {
+    // TODO: Implement
+    confirmed.value = true;
+  } catch (error) {
+    console.error(error);
+    // TODO: Handle errors
+  }
+  loading.value = false;
+}
 </script>
 
 <style lang="scss">
@@ -57,23 +84,32 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
 .vote-confirm {
   overflow-y: auto;
   box-sizing: border-box;
-  padding: 0 16px 16px;
+  padding-top: 16px;
   user-select: text;
 
   .vote-confirm__title {
     text-align: center;
-    margin: 32px 0;
+    margin: 0;
     line-height: 1.2;
   }
 
-  .confirm-card, .vote-confirm__notice, .vote-confirm__buttons {
+  .vote-confirm__wrapper, .vote-confirm__title {
     max-width: 500px;
     margin-left: auto;
     margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .vote-confirm__wrapper {
+    padding-top: 32px;
+    padding-bottom: 16px;
+    overflow: hidden;
+    transition: margin-bottom 300ms 500ms, padding-bottom 300ms 500ms;
   }
 
   .confirm-card {
-    margin-top: 16px;
+    margin-bottom: 16px;
 
     &.confirm-card--negative {
       margin-top: 32px;
@@ -96,15 +132,38 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
   }
 
   .vote-confirm__buttons {
-    display: flex;
-    gap: 12px;
+    display: grid;
+    margin-left: 0;
+    margin-right: 0;
+    transition:
+      transform $single-duration, opacity $single-duration,
+      margin 400ms !important;
+    gap: 16px;
+    grid-template-columns: auto 1fr;
 
     .floating-button {
       display: block;
+      grid-row: 1;
+    }
+
+    .vote-confirm__change {
+      grid-column: 1;
     }
 
     .vote-confirm__submit {
-      flex-grow: 1;
+      grid-column: 2;
+    }
+
+    &::before {
+      grid-column: 1/3;
+      grid-row: 1;
+      content: ' ';
+      display: block;
+      opacity: 0;
+      background: #333;
+      transition: opacity 350ms 100ms, box-shadow 150ms 300ms;
+      pointer-events: none;
+      z-index: 1;
     }
   }
 
@@ -112,21 +171,78 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
     user-select: none;
     pointer-events: none;
 
-    > * {
+    .vote-confirm__animated {
       transform: translateY(-30px);
       opacity: 0;
       transition-delay: calc(#{$total-duration - $single-duration} - var(--delay));
     }
   }
 
-  > * {
+  &.vote-confirm--confirmed {
+    user-select: none;
+
+    @keyframes cardDisappear {
+      to {
+        transform: translateY(600px);
+      }
+    }
+
+    @keyframes slotDisappear {
+      to {
+        height: 0;
+      }
+    }
+
+    .vote-confirm__title, .vote-confirm__notice {
+      opacity: 0;
+    }
+
+    .vote-confirm__wrapper {
+      padding-bottom: 0;
+      margin-bottom: 16px;
+    }
+
+    .vote-confirm__buttons {
+      margin-left: -8px;
+      margin-right: -8px;
+
+      > .floating-button {
+        box-shadow: none;
+        pointer-events: none;
+        transition: visibility 0ms 500ms;
+        visibility: hidden;
+      }
+
+      &::before {
+        align-self: center;
+        opacity: 1;
+        height: 100%;
+        box-shadow: 5px 5px 0 #000a inset;
+        animation: slotDisappear 500ms 2000ms forwards;
+      }
+    }
+
+    .confirm-card {
+      position: relative;
+      animation: cardDisappear ease-in 700ms var(--fall-delay) forwards;
+      z-index: 2;
+    }
+  }
+
+  .vote-confirm__animated {
     transition: transform $single-duration, opacity $single-duration;
     transition-delay: var(--delay);
   }
 
   @for $i from 1 through $count {
-    > *:nth-child(#{$i}) {
+    .vote-confirm__animated--#{$i} {
       --delay: #{$single-offset * ($i - 1)};
+    }
+  }
+
+  @for $i from 1 through 4 {
+    .vote-confirm__animated--#{$i + 1} {
+      --fall-delay: #{400ms + 200ms * (4-$i)};
     }
   }
 }
