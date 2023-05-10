@@ -78,7 +78,7 @@
 
 <script lang="ts" setup>
 import Podium from "../components/Podium.vue";
-import {computedEager, templateRef, useVibrate, useWindowSize} from "@vueuse/core";
+import {computedEager, templateRef, useTimeoutFn, useVibrate, useWindowSize} from "@vueuse/core";
 import {computed, reactive, ref, watch} from "vue";
 import CardSlot from "../components/CardSlot.vue";
 import {logicOr, not, or} from "@vueuse/math";
@@ -97,6 +97,10 @@ import {vote} from "../api";
 
 const props = defineProps<{
   systemInfo: SystemInfoValid;
+}>();
+
+const emit = defineEmits<{
+  (name: 'success'): void;
 }>();
 
 const { vibrate } = useVibrate({ pattern: 50 });
@@ -199,10 +203,14 @@ const onNext = () => {
 
 const confirmVote = async (): Promise<VoteErrorType | 'OTHER' | null> => {
   if (selectionNumbers.value === null) return 'OTHER';
-  return await vote(props.systemInfo.token, selectionNumbers.value).catch((error) => {
+  const result = await vote(props.systemInfo.token, selectionNumbers.value).catch((error) => {
     console.error(error);
     return 'OTHER' as const;
   });
+  if (result === null) useTimeoutFn(() => {
+    emit('success');
+  }, 4000);
+  return result;
 };
 
 const scrollEnd = useWindowScrollEnd(60);

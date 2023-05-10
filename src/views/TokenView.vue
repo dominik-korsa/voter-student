@@ -127,6 +127,14 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
 <style lang="scss">
 @import "../assets/constants";
 
+@keyframes token__input-appear {
+  from { transform: scale(0); }
+}
+
+@keyframes token__other-appear {
+  from { opacity: 0; }
+}
+
 .token {
   display: flex;
   min-height: v-bind(height);
@@ -140,10 +148,15 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
     opacity: 0;
   }
 
+  .label, .error, .token__admin-link {
+    animation: token__other-appear 1500ms backwards;
+  }
+
   .label {
     margin-bottom: 8px;
     font-size: 2em;
     color: #000c;
+    animation-delay: 1000ms;
   }
 
   $loading-transition: 150ms;
@@ -156,6 +169,7 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
     box-shadow: 3px 3px #0003;
     transition: box-shadow 200ms, transform 200ms, margin-bottom $loading-transition;
     margin-bottom: $loading-height;
+    animation: token__input-appear 500ms 250ms backwards;
 
     &:focus-within {
       box-shadow: 5px 5px #0003;
@@ -210,9 +224,9 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
         width: 150%;
         height: 100%;
         background: repeating-linear-gradient(
-          -60deg,
-          $green 0 20px,
-          #00A37D 20px 25px
+            -60deg,
+            $green 0 20px,
+            #00A37D 20px 25px
         );
         animation: inputBackground 1.5s infinite linear;
       }
@@ -232,6 +246,7 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
     margin-top: 8px;
     font-size: 1.5em;
     transition: opacity 200ms;
+    animation-delay: 1250ms;
 
     &:not(.error--visible) {
       user-select: none;
@@ -242,6 +257,7 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
   .token__admin-link {
     margin-top: 24px;
     font-size: 0.9em;
+    animation-delay: 1500ms;
   }
 }
 </style>

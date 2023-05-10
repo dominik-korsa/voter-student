@@ -10,6 +10,7 @@
     />
     <vote-view
         :system-info="systemInfo"
+        @success="onSuccess"
         v-else
     />
 </template>
@@ -90,6 +91,10 @@ export default defineComponent({
                     systemInfo.value = result;
                 }, 750);
                 return null;
+            },
+            onSuccess: () => {
+                replacePath(null);
+                systemInfo.value = null;
             },
         }
     },

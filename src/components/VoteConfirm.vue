@@ -77,8 +77,7 @@ const submit = async () => {
   const result = await props.confirmVote();
   if (result === null) {
     confirmed.value = true;
-    await delay(3000);
-    alert('Navigate away!');
+    await delay(10000);
     confirmed.value = false;
   } else {
     errorMessage.value = {
