@@ -23,6 +23,7 @@ export async function getSystemInfoWithoutToken(): Promise<SystemInfoWithoutToke
 const demoSystemInfo = {
   class: 'demo',
   availableLogos: range(1, 51),
+  isDemo: true,
 };
 
 const isDemoToken = (token: string) => [
@@ -44,6 +45,7 @@ export async function getSystemInfoWithToken(token: string): Promise<SystemInfoW
     token,
     class: response.data.class,
     availableLogos: response.data.availableLogos,
+    isDemo: false,
   };
 }
 

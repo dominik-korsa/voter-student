@@ -7,6 +7,9 @@
     'vote--covered': isCovered,
     'vote--covered-long': isCoveredCapacitor,
   }">
+    <div class="vote__demo-banner" v-if="systemInfo.isDemo">
+      Demo
+    </div>
     <div class="vote__list" v-memo="[cards]">
       <card-slot
         v-for="card in cards"
@@ -248,6 +251,22 @@ body:has(.vote), html.page--vote body {
   position: relative;
   overflow: hidden;
   min-height: 100vh;
+
+  .vote__demo-banner {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background: $negative;
+    color: white;
+    box-shadow: 3px 3px 0 #0003;
+    font-size: 0.8rem;
+    border-bottom-left-radius: 10px;
+    pointer-events: none;
+    padding: 4px 8px;
+    text-transform: uppercase;
+    z-index: 500;
+    font-weight: bold;
+  }
 
   .vote__list {
     padding: 8px 8px 140px + $card-height;

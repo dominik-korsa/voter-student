@@ -41,6 +41,7 @@ export interface SystemInfoValid {
   token: string;
   class: string;
   availableLogos: number[];
+  isDemo: boolean;
 }
 
 export type SystemInfoWithoutToken = 'reset' | 'not-voting' | 'no-token';
