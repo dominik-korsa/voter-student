@@ -1,11 +1,23 @@
-import {onBeforeUnmount, onMounted} from "vue";
+import {onBeforeUnmount} from "vue";
+import {MaybeRefOrGetter, notNullish, toValue, watchImmediate} from "@vueuse/core";
 
-export const useHTMLClass = (className: string) => {
-    onMounted(() => {
-        document.documentElement.classList.add(className);
+const tryAdd = (value: string | null | undefined) => {
+    if (!notNullish(value)) return;
+    document.documentElement.classList.add(value);
+}
+
+const tryRemove = (value: string | null | undefined) => {
+    if (!notNullish(value)) return;
+    document.documentElement.classList.remove(value);
+}
+
+export const useHTMLClass = (className: MaybeRefOrGetter<string | null>) => {
+    watchImmediate(() => toValue(className), (value, oldValue) => {
+        tryAdd(value);
+        tryRemove(oldValue);
     });
 
     onBeforeUnmount(() => {
-        document.documentElement.classList.remove(className);
+        tryRemove(toValue(className));
     });
 }

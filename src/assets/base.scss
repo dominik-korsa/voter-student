@@ -12,6 +12,10 @@ body {
   overscroll-behavior-y: none;
 }
 
+html.disable-scroll body {
+  overflow-y: hidden;
+}
+
 :root {
   --card-width: min(128px, calc((100vw - #{$card-gap * 4} - 24px) / 3));
 }

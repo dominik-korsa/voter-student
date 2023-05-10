@@ -4,6 +4,8 @@
     'vote--reveal-podium': revealPodium,
     'vote--scroll-end': scrollEnd,
     'vote--desktop': isDesktop,
+    'vote--covered': isCovered,
+    'vote--covered-long': isCoveredCapacitor,
   }">
     <div class="vote__list" v-memo="[cards]">
       <card-slot
@@ -28,7 +30,7 @@
       <floating-button
         class="vote__button vote__button--prev"
         :disable="!prevVisible"
-        @click="showStandOfShame = false"
+        @click="onBack"
       >
       👈 Wstecz
     </floating-button>
@@ -42,24 +44,29 @@
     <div
       class="vote__shelf"
       :class="{
-        'vote__shelf--show-stand-of-shame': isDesktop ? standOfShameAllowed : showStandOfShame,
+        'vote__shelf--show-stand-of-shame': isDesktop ? standOfShameAllowed : view !== 'podium',
       }"
     >
-      <div class="vote__shelf-spacer-1" />
-      <podium
-        :active="dragging"
-        :first-card="selections.first"
-        :second-card="selections.second"
-        :third-card="selections.third"
-        ref="podium"
-      />
-      <div class="vote__shelf-spacer-2" />
-      <stand-of-shame
-        :active="dragging"
-        :card="selections.negative"
-        ref="standOfShame"
-      />
-      <div class="vote__shelf-spacer-3" />
+      <div class="vote__shelf-confirm">
+        <vote-confirm />
+      </div>
+      <div class="vote__shelf-content">
+        <div class="vote__shelf-spacer-1" />
+        <podium
+          :active="dragging"
+          :first-card="selections.first"
+          :second-card="selections.second"
+          :third-card="selections.third"
+          ref="podium"
+        />
+        <div class="vote__shelf-spacer-2" />
+        <stand-of-shame
+          :active="dragging"
+          :card="selections.negative"
+          ref="standOfShame"
+        />
+        <div class="vote__shelf-spacer-3" />
+      </div>
     </div>
   </div>
 </template>
@@ -79,6 +86,8 @@ import {useLatch} from "../composables/latch";
 import {useCapacitor} from "../composables/capacitor";
 import {SystemInfoValid} from "../api/types";
 import {useHTMLClass} from "../composables/html-class";
+import VoteConfirm from "../components/VoteConfirm.vue";
+import {useTimePassed} from "../composables/time-passed";
 
 const props = defineProps<{
     systemInfo: SystemInfoValid;
@@ -95,6 +104,13 @@ const standOfShame = templateRef<InstanceType<typeof StandOfShame>>('standOfSham
 
 const draggedCards = reactive(new Set<number>());
 const dragging = computedEager(() => draggedCards.size > 0);
+const view = ref<'podium' | 'stand-of-shame' | 'confirm'>('podium');
+
+const initialTimePassed = useTimePassed(400);
+const isCovered = computedEager(() => view.value === 'confirm' || !initialTimePassed.value);
+const isCoveredCapacitor = useCapacitor(isCovered, 800);
+const isNotCoveredCapacitor = not(useCapacitor(not(isCovered), 800));
+useHTMLClass(() => isCovered.value ? 'disable-scroll' : null);
 
 const selections = reactive<Record<SlotName, CardReference | null>>({
   first: null,
@@ -106,29 +122,34 @@ const selections = reactive<Record<SlotName, CardReference | null>>({
 const podiumCardsSet = computed(() =>
     selections.first !== null && selections.second !== null && selections.third !== null
 );
+const standOfShameAllowed = useLatch(not(useCapacitor(
+    logicOr(
+        not(podiumCardsSet),
+        dragging,
+    ),
+    750,
+)));
 const allCardsSet = computed(
     () => podiumCardsSet.value && selections.negative !== null
 );
 const confirmAllowed = useLatch(not(useCapacitor(not(allCardsSet), 750)));
-const showStandOfShame = ref(false);
-const standOfShameAllowed = useLatch(not(useCapacitor(
-    logicOr(
-      not(podiumCardsSet),
-      dragging,
-    ),
-    750,
-)));
-const prevVisible = computed(() => !isDesktop.value && showStandOfShame.value);
-const nextVisible = computed(() => (allCardsSet.value && confirmAllowed.value) || (
-    !isDesktop.value
-    && !showStandOfShame.value
-    && (selections.negative !== null || (standOfShameAllowed.value && podiumCardsSet.value))
-));
 
-const isPodiumVisible = () => isDesktop.value || !showStandOfShame.value;
-const isStandOfShameVisible = () => isDesktop.value
-    ? standOfShameAllowed.value
-    : showStandOfShame.value;
+const prevVisible = computed(() => {
+    if (view.value === 'confirm') return !isDesktop.value || isNotCoveredCapacitor.value;
+    return view.value === 'stand-of-shame' && !isDesktop.value;
+});
+
+const nextVisible = computed(() => {
+    if (view.value === 'confirm') return false;
+    if (!isDesktop.value && view.value === 'podium') {
+        return selections.negative !== null || (standOfShameAllowed.value && podiumCardsSet.value);
+    }
+    return allCardsSet.value && confirmAllowed.value && !isCoveredCapacitor.value;
+});
+
+const isPodiumVisible = () => view.value === 'podium' || (isDesktop.value || view.value === 'stand-of-shame');
+const isStandOfShameVisible = () => view.value === 'stand-of-shame'
+    || (view.value === 'podium' && isDesktop.value && standOfShameAllowed.value);
 
 const getHovered = (pos: Pos): SlotName | null => {
     if (isPodiumVisible()) {
@@ -154,13 +175,14 @@ const onReset = (card: CardReference) => {
     });
 }
 
+const onBack = () => {
+    if (view.value === 'confirm') view.value = 'stand-of-shame';
+    else view.value = 'podium';
+}
 const onNext = () => {
-    if (isDesktop.value || showStandOfShame.value) {
-        if (!allCardsSet.value) return;
-        console.log('Go to confirm screen');
-    } else {
-      showStandOfShame.value = true;
-    }
+    if (view.value === 'confirm') return;
+    if (view.value === 'stand-of-shame' || isDesktop.value) view.value = 'confirm';
+    else view.value = 'stand-of-shame';
 };
 
 const scrollEnd = useWindowScrollEnd(60);
@@ -258,36 +280,38 @@ body:has(.vote), html.page--vote body {
   }
 
   .vote__shelf {
-    @keyframes shelf-reveal {
-      from {
-        min-height: 100%;
-      }
-      to {
-        min-height: 100px;
-      }
-    }
-
-    @keyframes podium-reveal {
-      from {
-        transform: translateY(180px);
-      }
-    }
-
     position: fixed;
     bottom: 0;
     width: 100%;
     background: $yellow;
-    padding-top: 8px;
     box-shadow: 0 0 0 3px #0003;
-    display: flex;
     overflow: hidden;
-    animation: shelf-reveal 800ms ease-out 400ms backwards;
+    min-height: 100px;
+    transition: min-height 800ms ease-out;
+    padding-top: 8px;
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
+
+    .vote__shelf-confirm {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .vote__shelf-content {
+      grid-column: 1;
+      grid-row: 1;
+      transition: transform 600ms ease-out;
+      transition-delay: 400ms;
+      width: 100%;
+      display: flex;
+      align-self: end;
+    }
 
     .podium {
       width: 100%;
       flex-shrink: 0;
       transition: margin-left 300ms;
-      animation: podium-reveal 600ms ease-out 900ms backwards;
     }
 
     .stand-of-shame {
@@ -300,10 +324,45 @@ body:has(.vote), html.page--vote body {
     }
   }
 
+  &.vote--covered-long {
+    .vote__shelf-content {
+      pointer-events: none;
+    }
+
+    &:not(.vote--desktop) {
+      .vote__button--prev {
+        transition-duration: 500ms;
+      }
+    }
+  }
+
+  &.vote--covered-long.vote--desktop, &.vote--covered {
+    .vote__button--prev {
+      bottom: 16px;
+    }
+  }
+
+  &.vote--covered {
+    &.vote--desktop .vote__button--prev {
+      transition: left $podium-transition-duration;
+    }
+
+    .vote__shelf {
+      min-height: 100%;
+
+      .vote__shelf-confirm {
+        height: 100%;
+      }
+
+      .vote__shelf-content {
+        transform: translateY(180px);
+        transition-delay: 0ms;
+      }
+    }
+  }
+
   &.vote--desktop {
     .vote__shelf {
-      display: flex;
-
       .podium {
         width: auto;
         margin-left: 0;
