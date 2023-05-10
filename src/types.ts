@@ -7,6 +7,9 @@ export interface StatePointer extends Pos {
     pointerId: number;
 }
 
+export const slotNames = ['first', 'second', 'third', 'negative'] as const;
+export type SlotName = typeof slotNames[number];
+
 export interface CardReference {
   number: number;
   raised: boolean;

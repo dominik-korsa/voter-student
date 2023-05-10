@@ -71,22 +71,22 @@ $line-height: 24px;
 
   &.podium-stand--first {
     --vertical-padding: 24px;
-    --color: goldenrod;
+    --color: #{$first};
   }
 
   &.podium-stand--second {
     --vertical-padding: 16px;
-    --color: silver;
+    --color: #{$second};
   }
 
   &.podium-stand--third {
     --vertical-padding: 8px;
-    --color: saddlebrown;
+    --color: #{$third};
   }
 
   &.podium-stand--negative {
     --vertical-padding: 12px;
-    --color: indianred;
+    --color: #{$negative};
   }
 }
 

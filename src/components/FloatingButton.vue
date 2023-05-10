@@ -35,13 +35,15 @@ export default defineComponent({
   font-size: 1rem;
   font-family: inherit;
   font-weight: bold;
+  --position-transinition-duration: #{$podium-transition-duration};
   transition:
-    bottom $podium-transition-duration,
-    right $podium-transition-duration,
-    left $podium-transition-duration,
+    bottom var(--position-transinition-duration),
+    right var(--position-transinition-duration),
+    left var(--position-transinition-duration),
     box-shadow 200ms,
     transform 200ms;
   cursor: pointer;
+  user-select: none;
   --height: calc(2 * var(--vertical-padding) + #{$line-height});
 
   @media screen and (max-width: 400px) {

@@ -27,11 +27,11 @@
       </card-slot>
     </div>
     <div class="vote__overlay" />
-      <floating-button
-        class="vote__button vote__button--prev"
-        :disable="!prevVisible"
-        @click="onBack"
-      >
+    <floating-button
+      class="vote__button vote__button--prev"
+      :disable="!prevVisible"
+      @click="view = 'podium'"
+    >
       👈 Wstecz
     </floating-button>
     <floating-button
@@ -47,8 +47,12 @@
         'vote__shelf--show-stand-of-shame': isDesktop ? standOfShameAllowed : view !== 'podium',
       }"
     >
-      <div class="vote__shelf-confirm">
-        <vote-confirm />
+      <div class="vote__shelf-confirm" v-if="confirmShowCapacitor && allCardsSet">
+        <vote-confirm
+          :visible="confirmVisibleCapacitor"
+          :selections="selections"
+          @close="view = 'stand-of-shame'"
+        />
       </div>
       <div class="vote__shelf-content">
         <div class="vote__shelf-spacer-1" />
@@ -76,8 +80,8 @@ import Podium from "../components/Podium.vue";
 import {computedEager, templateRef, useVibrate, useWindowSize} from "@vueuse/core";
 import {computed, reactive, ref, watch} from "vue";
 import CardSlot from "../components/CardSlot.vue";
-import {logicOr, not} from "@vueuse/math";
-import {CardReference, Pos} from "../types";
+import {logicOr, not, or} from "@vueuse/math";
+import {CardReference, Pos, SlotName, slotNames} from "../types";
 import DraggableCard from "../components/DraggableCard.vue";
 import {useWindowScrollEnd} from "../composables/windows-scroll-end";
 import FloatingButton from "../components/FloatingButton.vue";
@@ -93,9 +97,6 @@ const props = defineProps<{
     systemInfo: SystemInfoValid;
 }>();
 
-const slotNames = ['first', 'second', 'third', 'negative'] as const;
-type SlotName = typeof slotNames[number];
-
 const { vibrate } = useVibrate({ pattern: 50 });
 useHTMLClass('page--vote');
 
@@ -107,9 +108,14 @@ const dragging = computedEager(() => draggedCards.size > 0);
 const view = ref<'podium' | 'stand-of-shame' | 'confirm'>('podium');
 
 const initialTimePassed = useTimePassed(400);
-const isCovered = computedEager(() => view.value === 'confirm' || !initialTimePassed.value);
+const confirmVisibleCapacitor = not(useCapacitor(() => view.value !== 'confirm', 800));
+const confirmShowCapacitor = useCapacitor(confirmVisibleCapacitor, 500);
+const isCovered = or(
+  confirmShowCapacitor,
+  () => view.value === 'confirm',
+  not(initialTimePassed),
+);
 const isCoveredCapacitor = useCapacitor(isCovered, 800);
-const isNotCoveredCapacitor = not(useCapacitor(not(isCovered), 800));
 useHTMLClass(() => isCovered.value ? 'disable-scroll' : null);
 
 const selections = reactive<Record<SlotName, CardReference | null>>({
@@ -135,8 +141,7 @@ const allCardsSet = computed(
 const confirmAllowed = useLatch(not(useCapacitor(not(allCardsSet), 750)));
 
 const prevVisible = computed(() => {
-    if (view.value === 'confirm') return !isDesktop.value || isNotCoveredCapacitor.value;
-    return view.value === 'stand-of-shame' && !isDesktop.value;
+    return view.value === 'stand-of-shame' && !isDesktop.value && !isCoveredCapacitor.value;
 });
 
 const nextVisible = computed(() => {
@@ -283,6 +288,7 @@ body:has(.vote), html.page--vote body {
     position: fixed;
     bottom: 0;
     width: 100%;
+    max-height: 100%;
     background: $yellow;
     box-shadow: 0 0 0 3px #0003;
     overflow: hidden;
@@ -291,11 +297,14 @@ body:has(.vote), html.page--vote body {
     padding-top: 8px;
     display: grid;
     grid-template-columns: 100%;
-    grid-template-rows: auto;
+    grid-template-rows: minmax(100%, auto);
 
     .vote__shelf-confirm {
       grid-column: 1;
       grid-row: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .vote__shelf-content {
@@ -324,29 +333,11 @@ body:has(.vote), html.page--vote body {
     }
   }
 
-  &.vote--covered-long {
-    .vote__shelf-content {
-      pointer-events: none;
-    }
-
-    &:not(.vote--desktop) {
-      .vote__button--prev {
-        transition-duration: 500ms;
-      }
-    }
-  }
-
-  &.vote--covered-long.vote--desktop, &.vote--covered {
-    .vote__button--prev {
-      bottom: 16px;
-    }
+  &.vote--covered-long .vote__shelf-content {
+    pointer-events: none;
   }
 
   &.vote--covered {
-    &.vote--desktop .vote__button--prev {
-      transition: left $podium-transition-duration;
-    }
-
     .vote__shelf {
       min-height: 100%;
 
