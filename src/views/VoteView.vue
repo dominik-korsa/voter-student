@@ -50,7 +50,7 @@
       <div class="vote__shelf-confirm" v-if="confirmShowCapacitor && allCardsSet">
         <vote-confirm
           :visible="confirmVisibleCapacitor"
-          :selections="selections"
+          :selections="selections as Record<SlotName, CardReference>"
           @close="view = 'stand-of-shame'"
         />
       </div>
@@ -180,10 +180,6 @@ const onReset = (card: CardReference) => {
     });
 }
 
-const onBack = () => {
-    if (view.value === 'confirm') view.value = 'stand-of-shame';
-    else view.value = 'podium';
-}
 const onNext = () => {
     if (view.value === 'confirm') return;
     if (view.value === 'stand-of-shame' || isDesktop.value) view.value = 'confirm';

@@ -33,7 +33,7 @@ import ConfirmCard from "./ConfirmCard.vue";
 import FloatingButton from "./FloatingButton.vue";
 
 const props = defineProps<{
-  visible: false;
+  visible: boolean;
   selections: Record<SlotName, CardReference>
 }>();
 
