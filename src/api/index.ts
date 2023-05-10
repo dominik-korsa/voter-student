@@ -1,5 +1,12 @@
-import type {SystemInfoWithToken, SystemInfoWithoutToken, SystemInfoResponse, SystemInfoResponsePartial} from './types';
+import type {
+  SystemInfoWithToken,
+  SystemInfoWithoutToken,
+  SystemInfoResponse,
+  SystemInfoResponsePartial,
+  SystemInfoValid
+} from './types';
 import axios from 'axios';
+import {range} from "../utils";
 
 const instance = axios.create({
   baseURL: '/api',
@@ -13,7 +20,14 @@ export async function getSystemInfoWithoutToken(): Promise<SystemInfoWithoutToke
   return 'no-token';
 }
 
+const demoSystemInfo: SystemInfoValid = {
+  class: 'demo',
+  availableLogos: range(1, 51),
+};
+
 export async function getSystemInfoWithToken(token: string): Promise<SystemInfoWithToken> {
+  if (['DEMO-DEMO', 'DEMO-1234', '1234-DEMO'].includes(token.toUpperCase())) return demoSystemInfo;
+
   const response = await instance.get<SystemInfoResponse>(`user/getinfo?token=${encodeURIComponent(token)}`);
   if (!response.data.provisioned) return 'reset';
   if (!response.data.voting) return 'not-voting';
