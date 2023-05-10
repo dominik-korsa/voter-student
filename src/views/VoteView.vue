@@ -189,7 +189,7 @@ const cards = computedEager(() => {
 <style lang="scss">
 @import "../assets/constants";
 
-html.page--vote body {
+body:has(.vote), html.page--vote body {
   background: $yellow-dark;
 }
 
