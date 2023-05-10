@@ -8,10 +8,10 @@
   >
     <h1 class="vote-confirm__title vote-confirm__animated vote-confirm__animated--1">Czy wszystko się zgadza?</h1>
     <div class="vote-confirm__wrapper">
-      <confirm-card class="vote-confirm__animated vote-confirm__animated--2" type="first" :logo="selections.first.number" />
-      <confirm-card class="vote-confirm__animated vote-confirm__animated--3" type="second" :logo="selections.second.number" />
-      <confirm-card class="vote-confirm__animated vote-confirm__animated--4" type="third" :logo="selections.third.number" />
-      <confirm-card class="vote-confirm__animated vote-confirm__animated--5" type="negative" :logo="selections.negative.number" />
+      <confirm-card class="vote-confirm__animated vote-confirm__animated--2" type="first" :logo="selections.first" />
+      <confirm-card class="vote-confirm__animated vote-confirm__animated--3" type="second" :logo="selections.second" />
+      <confirm-card class="vote-confirm__animated vote-confirm__animated--4" type="third" :logo="selections.third" />
+      <confirm-card class="vote-confirm__animated vote-confirm__animated--5" type="negative" :logo="selections.negative" />
       <div class="vote-confirm__notice vote-confirm__animated vote-confirm__animated--6">
         <b>Uwaga!</b> Po oddaniu głosu nie ma możliwości zmiany wyboru.
       </div>
@@ -26,10 +26,14 @@
         <floating-button
           class="vote-confirm__submit"
           @click="submit"
-          :disable="loading || confirmed"
+          :loading="loading"
+          :disable="confirmed || !voteUnlocked"
         >
           Oddaj głos 🚀
         ️</floating-button>
+      </div>
+      <div class="vote-confirm__error" v-if="errorMessage !== ''">
+        {{ errorMessage }}
       </div>
     </div>
   </div>
@@ -38,14 +42,16 @@
 <script lang="ts" setup>
 import {useTimePassed} from "../composables/time-passed";
 import {computedEager} from "@vueuse/core";
-import {CardReference, SlotName} from "../types";
+import {SlotName, VoteErrorType} from "../types";
 import ConfirmCard from "./ConfirmCard.vue";
 import FloatingButton from "./FloatingButton.vue";
-import {ref} from "vue";
+import {ref, watch} from "vue";
+import {delay} from "../utils";
 
 const props = defineProps<{
   visible: boolean;
-  selections: Record<SlotName, CardReference>
+  selections: Record<SlotName, number>;
+  confirmVote: () => Promise<VoteErrorType  | 'OTHER' | null>;
 }>();
 
 defineEmits<{
@@ -53,20 +59,36 @@ defineEmits<{
 }>();
 
 const initialTimePassed = useTimePassed(50);
+const voteUnlocked = useTimePassed(1000);
 const hidden = computedEager(() => !props.visible || !initialTimePassed.value);
 
 const confirmed = ref(false);
+const errorMessage = ref('');
 const loading = ref(false);
 
-const submit = () => {
-  if (loading.value) return;
+watch(() => props.visible, (value) => {
+  if (!value) errorMessage.value = '';
+});
+
+const submit = async () => {
+  if (loading.value || !voteUnlocked.value) return;
   loading.value = true;
-  try {
-    // TODO: Implement
+  errorMessage.value = '';
+  const result = await props.confirmVote();
+  if (result === null) {
     confirmed.value = true;
-  } catch (error) {
-    console.error(error);
-    // TODO: Handle errors
+    await delay(3000);
+    alert('Navigate away!');
+    confirmed.value = false;
+  } else {
+    errorMessage.value = {
+      INVALID_TOKEN: 'Kod do głosowania jest niepoprawny',
+      LOGO_NOT_ALLOWED: 'Nie możesz głosować na logo osób z twojej klasy',
+      NOT_PROVISIONED: 'System jest zresetowany, odśwież stronę',
+      NOT_VOTING: 'Głosowanie jest zablokowane, odśwież stronę',
+      TOKEN_ALREADY_USED: 'Ten kod do głosowania został już wykorzystany',
+      OTHER: 'Wystąpił nieoczekiwany błąd',
+    }[result];
   }
   loading.value = false;
 }
@@ -74,6 +96,7 @@ const submit = () => {
 
 <style lang="scss">
 @use "sass:math";
+@import "src/assets/constants";
 
 $total-duration: 500ms;
 $single-duration: 200ms;
@@ -93,7 +116,7 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
     line-height: 1.2;
   }
 
-  .vote-confirm__wrapper, .vote-confirm__title {
+  .vote-confirm__wrapper, .vote-confirm__title, .vote-confirm__error {
     max-width: 500px;
     margin-left: auto;
     margin-right: auto;
@@ -136,13 +159,12 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
     margin-left: 0;
     margin-right: 0;
     transition:
-      transform $single-duration, opacity $single-duration,
+      transform $single-duration var(--delay), opacity $single-duration var(--delay),
       margin 400ms !important;
     gap: 16px;
     grid-template-columns: auto 1fr;
 
     .floating-button {
-      display: block;
       grid-row: 1;
     }
 
@@ -167,6 +189,12 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
     }
   }
 
+  .vote-confirm__error {
+    color: $error;
+    margin-top: 16px;
+    text-align: center;
+  }
+
   &.vote-confirm--hidden {
     user-select: none;
     pointer-events: none;
@@ -174,7 +202,7 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
     .vote-confirm__animated {
       transform: translateY(-30px);
       opacity: 0;
-      transition-delay: calc(#{$total-duration - $single-duration} - var(--delay));
+      --delay: calc(#{$total-duration - $single-duration} - var(--base-delay));
     }
   }
 
@@ -232,11 +260,12 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
   .vote-confirm__animated {
     transition: transform $single-duration, opacity $single-duration;
     transition-delay: var(--delay);
+    --delay: var(--base-delay);
   }
 
   @for $i from 1 through $count {
     .vote-confirm__animated--#{$i} {
-      --delay: #{$single-offset * ($i - 1)};
+      --base-delay: #{$single-offset * ($i - 1)};
     }
   }
 

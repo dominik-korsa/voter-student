@@ -47,10 +47,11 @@
         'vote__shelf--show-stand-of-shame': isDesktop ? standOfShameAllowed : view !== 'podium',
       }"
     >
-      <div class="vote__shelf-confirm" v-if="confirmShowCapacitor && allCardsSet">
+      <div class="vote__shelf-confirm" v-if="confirmShowCapacitor && selectionNumbers !== null">
         <vote-confirm
           :visible="confirmVisibleCapacitor"
-          :selections="selections as Record<SlotName, CardReference>"
+          :selections="selectionNumbers"
+          :confirm-vote="confirmVote"
           @close="view = 'stand-of-shame'"
         />
       </div>
@@ -81,7 +82,7 @@ import {computedEager, templateRef, useVibrate, useWindowSize} from "@vueuse/cor
 import {computed, reactive, ref, watch} from "vue";
 import CardSlot from "../components/CardSlot.vue";
 import {logicOr, not, or} from "@vueuse/math";
-import {CardReference, Pos, SlotName, slotNames} from "../types";
+import {CardReference, Pos, SlotName, slotNames, VoteErrorType} from "../types";
 import DraggableCard from "../components/DraggableCard.vue";
 import {useWindowScrollEnd} from "../composables/windows-scroll-end";
 import FloatingButton from "../components/FloatingButton.vue";
@@ -92,9 +93,10 @@ import {SystemInfoValid} from "../api/types";
 import {useHTMLClass} from "../composables/html-class";
 import VoteConfirm from "../components/VoteConfirm.vue";
 import {useTimePassed} from "../composables/time-passed";
+import {vote} from "../api";
 
 const props = defineProps<{
-    systemInfo: SystemInfoValid;
+  systemInfo: SystemInfoValid;
 }>();
 
 const { vibrate } = useVibrate({ pattern: 50 });
@@ -123,6 +125,15 @@ const selections = reactive<Record<SlotName, CardReference | null>>({
   second: null,
   third: null,
   negative: null,
+});
+const selectionNumbers = computedEager(() => {
+  if (selections.first === null || selections.second === null || selections.third === null || selections.negative === null) return null;
+  return {
+    first: selections.first.number,
+    second: selections.second.number,
+    third: selections.third.number,
+    negative: selections.negative.number,
+  }
 });
 
 const podiumCardsSet = computed(() =>
@@ -184,6 +195,14 @@ const onNext = () => {
     if (view.value === 'confirm') return;
     if (view.value === 'stand-of-shame' || isDesktop.value) view.value = 'confirm';
     else view.value = 'stand-of-shame';
+};
+
+const confirmVote = async (): Promise<VoteErrorType | 'OTHER' | null> => {
+  if (selectionNumbers.value === null) return 'OTHER';
+  return await vote(props.systemInfo.token, selectionNumbers.value).catch((error) => {
+    console.error(error);
+    return 'OTHER' as const;
+  });
 };
 
 const scrollEnd = useWindowScrollEnd(60);

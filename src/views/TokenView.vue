@@ -228,7 +228,7 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
   }
 
   .error {
-    color: #c53333;
+    color: $error;
     margin-top: 8px;
     font-size: 1.5em;
     transition: opacity 200ms;

@@ -38,6 +38,7 @@ export type SystemInfoResponse =
 
 
 export interface SystemInfoValid {
+  token: string;
   class: string;
   availableLogos: number[];
 }

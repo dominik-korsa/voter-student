@@ -3,10 +3,10 @@ import type {
   SystemInfoWithoutToken,
   SystemInfoResponse,
   SystemInfoResponsePartial,
-  SystemInfoValid
 } from './types';
-import axios from 'axios';
-import {range} from "../utils";
+import axios, {AxiosError} from 'axios';
+import {delay, range} from "../utils";
+import {SelectionNumbers, VoteErrorType} from "../types";
 
 const instance = axios.create({
   baseURL: '/api',
@@ -20,13 +20,20 @@ export async function getSystemInfoWithoutToken(): Promise<SystemInfoWithoutToke
   return 'no-token';
 }
 
-const demoSystemInfo: SystemInfoValid = {
+const demoSystemInfo = {
   class: 'demo',
   availableLogos: range(1, 51),
 };
 
+const isDemoToken = (token: string) => [
+  'DEMO-DEMO', 'DEMO-1234', '1234-DEMO'
+].includes(token.toUpperCase())
+
 export async function getSystemInfoWithToken(token: string): Promise<SystemInfoWithToken> {
-  if (['DEMO-DEMO', 'DEMO-1234', '1234-DEMO'].includes(token.toUpperCase())) return demoSystemInfo;
+  if (isDemoToken(token)) return {
+    ...demoSystemInfo,
+    token,
+  };
 
   const response = await instance.get<SystemInfoResponse>(`user/getinfo?token=${encodeURIComponent(token)}`);
   if (!response.data.provisioned) return 'reset';
@@ -34,6 +41,7 @@ export async function getSystemInfoWithToken(token: string): Promise<SystemInfoW
   if (!response.data.found) return 'token-not-found';
   if (response.data.used) return 'token-used';
   return {
+    token,
     class: response.data.class,
     availableLogos: response.data.availableLogos,
   };
@@ -42,4 +50,35 @@ export async function getSystemInfoWithToken(token: string): Promise<SystemInfoW
 export async function getSystemInfo(token?: string | undefined | null) {
   if (token) return getSystemInfoWithToken(token);
   return getSystemInfoWithoutToken();
+}
+
+export async function vote(token: string, selections: SelectionNumbers): Promise<VoteErrorType | null> {
+  if (isDemoToken(token)) {
+    await delay(200);
+    console.warn(`Voted using demo token ${token}`);
+    return null;
+  }
+
+  try {
+    await instance.post('/api/user/vote', {
+      token,
+      votes: [
+        { points: 5, logo: selections.first, },
+        { points: 3, logo: selections.second, },
+        { points: 1, logo: selections.third, },
+        { points: -1, logo: selections.negative, },
+      ]
+    });
+    return null;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response !== undefined) {
+      const data = error.response.data as { error: string };
+      if (data.error === 'NOT_PROVISIONED') return 'NOT_PROVISIONED';
+      if (data.error === 'NOT_VOTING') return 'NOT_VOTING';
+      if (data.error === 'INVALID_TOKEN') return 'INVALID_TOKEN';
+      if (data.error === 'TOKEN_ALREADY_USED') return 'TOKEN_ALREADY_USED';
+      if (data.error === 'LOGO_NOT_ALLOWED') return 'LOGO_NOT_ALLOWED';
+    }
+    throw error;
+  }
 }

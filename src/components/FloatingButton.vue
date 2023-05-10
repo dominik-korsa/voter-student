@@ -1,20 +1,31 @@
 <template>
   <button
     class="floating-button"
-    :disabled="disable"
+    :class="{
+      'floating-button--loading': loading,
+    }"
+    :disabled="disable || loading"
     :tabindex="disable ? -1 : 0"
   >
-    <slot />
+    <span class="floating-button__content">
+      <slot />
+    </span>
+    <span class="floating-button__loading">
+      <loading-dots />
+    </span>
   </button>
 </template>
 
 <script lang="ts">
 import {defineComponent} from "vue";
+import LoadingDots from "./LoadingDots.vue";
 
 export default defineComponent({
+  components: {LoadingDots},
   props: {
-      disable: Boolean,
-  }
+    disable: Boolean,
+    loading: Boolean,
+  },
 });
 </script>
 
@@ -45,6 +56,26 @@ export default defineComponent({
   cursor: pointer;
   user-select: none;
   --height: calc(2 * var(--vertical-padding) + #{$line-height});
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr;
+
+  .floating-button__content, .floating-button__loading {
+    grid-row: 1;
+    grid-column: 1;
+    display: block;
+    transition: opacity 200ms;
+  }
+
+  &.floating-button--loading > .floating-button__content {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &:not(.floating-button--loading) > .floating-button__loading {
+    opacity: 0;
+    pointer-events: none;
+  }
 
   @media screen and (max-width: 400px) {
     --horizontal-padding: 16px;

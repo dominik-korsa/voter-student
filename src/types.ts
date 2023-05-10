@@ -23,3 +23,7 @@ export interface Offset {
 }
 
 export type LoadingErrorType = 'token-not-found' | 'token-used' | 'other-error';
+
+export type VoteErrorType = 'NOT_PROVISIONED' | 'NOT_VOTING' | 'INVALID_TOKEN' | 'TOKEN_ALREADY_USED' | 'LOGO_NOT_ALLOWED';
+
+export type SelectionNumbers = Record<SlotName, number>;
