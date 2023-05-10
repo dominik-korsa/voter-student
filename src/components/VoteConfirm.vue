@@ -59,7 +59,7 @@ defineEmits<{
 }>();
 
 const initialTimePassed = useTimePassed(50);
-const voteUnlocked = useTimePassed(1000);
+const voteUnlocked = useTimePassed(2000);
 const hidden = computedEager(() => !props.visible || !initialTimePassed.value);
 
 const confirmed = ref(false);
