@@ -245,7 +245,7 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
         opacity: 1;
         height: 100%;
         box-shadow: 5px 5px 0 #000a inset;
-        animation: slotDisappear 500ms 2000ms forwards;
+        animation: slotDisappear 500ms 2500ms forwards;
       }
     }
 
@@ -270,7 +270,7 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
 
   @for $i from 1 through 4 {
     .vote-confirm__animated--#{$i + 1} {
-      --fall-delay: #{400ms + 200ms * (4-$i)};
+      --fall-delay: #{800ms + 200ms * (4-$i)};
     }
   }
 }
