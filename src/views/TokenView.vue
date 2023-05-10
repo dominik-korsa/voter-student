@@ -19,7 +19,7 @@
         v-maska:[maskOptions]
         autofocus
         autocomplete="off"
-        autocapitalize="none"
+        autocapitalize="characters"
         @maska="onMaska"
         :readonly="completed"
         :placeholder="placeholder"
