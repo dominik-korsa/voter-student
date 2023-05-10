@@ -62,7 +62,7 @@ export async function vote(token: string, selections: SelectionNumbers): Promise
   }
 
   try {
-    await instance.post('/api/user/vote', {
+    await instance.post('user/vote', {
       token,
       votes: [
         { points: 5, logo: selections.first, },
