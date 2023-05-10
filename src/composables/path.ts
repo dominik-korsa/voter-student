@@ -4,12 +4,12 @@ const getPathInfo = (pathname: string) => {
     const result = tokenPathRegex.exec(pathname);
     if (result === null) return { token: null };
     return {
-        token: `${result[1]}-${result[2]}`.toLowerCase(),
+        token: `${result[1]}-${result[2]}`.toUpperCase(),
     };
 }
 
 const replacePath = (token: string | null) => {
-    const normalized = token === null ? '/' : `/${token}`;
+    const normalized = token === null ? '/' : `/${token.toUpperCase()}`;
     if (normalized !== window.location.pathname) {
         const newURL = new URL(window.location.toString());
         newURL.pathname = normalized;

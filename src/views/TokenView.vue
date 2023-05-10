@@ -74,7 +74,7 @@ const maskOptions: MaskOptions = {
     mask: 'ZZZZ-ZZZZ',
     tokens: {
         'Z': {
-            pattern: /[a-zA-Z\d]/, transform: (chr: string) => chr.toLowerCase(),
+            pattern: /[a-zA-Z\d]/, transform: (chr: string) => chr.toUpperCase(),
         }
     },
 }
