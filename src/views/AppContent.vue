@@ -37,14 +37,14 @@ const loadInitial = async () => {
     const votingDisabled = ref(result === 'reset' || result === 'not-voting');
 
     if (result === 'reset') replacePath(null);
-    const initialLoadingError: LoadingErrorType | null = (
-        result === 'token-used' || result === 'token-not-found' || result === 'other-error'
-    ) ? result : null;
+    const initialLoadingError = ref<LoadingErrorType | null>(
+      (result === 'token-used' || result === 'token-not-found' || result === 'other-error') ? result : null
+    );
 
     return {
         votingDisabled,
         initialLoadingError,
-        initialToken: token,
+        initialToken: ref(token),
         systemInfo: ref(typeof result === 'object' ? result : null),
         replacePath,
     }
@@ -94,6 +94,8 @@ export default defineComponent({
             },
             onSuccess: () => {
                 replacePath(null);
+                initialToken.value = null;
+                initialLoadingError.value = null;
                 systemInfo.value = null;
             },
         }
