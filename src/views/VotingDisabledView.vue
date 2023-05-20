@@ -4,7 +4,7 @@
     <div>Skontaktuj się z administratorem</div>
 
     <a href="/admin/" class="voting-disabled__admin-link">
-      Zaloguj się jako administrator
+      Jestem administratorem.
     </a>
   </div>
 </template>
@@ -19,6 +19,7 @@ useHTMLClass('page--voting-disabled');
 body:has(.voting-disabled), html.page--voting-disabled body {
   height: 100vh;
   overflow: hidden;
+  overscroll-behavior-y: auto;
 
   #app {
     height: 100%;
