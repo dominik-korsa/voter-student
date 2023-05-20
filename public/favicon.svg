@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="24"
+   height="24"
+   viewBox="0 0 24 24"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2 (dc2aedaf03, 2022-05-15)"
+   sodipodi:docname="voter-favicon.svg"
+   inkscape:export-filename="voter-favicon-512.png"
+   inkscape:export-xdpi="2048"
+   inkscape:export-ydpi="2048"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#111111"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showgrid="true"
+     inkscape:zoom="7.9358942"
+     inkscape:cx="-25.201949"
+     inkscape:cy="11.151862"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid182"
+       empspacing="4" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Warstwa 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="rect290"
+       style="fill:#f5c800;fill-rule:evenodd;stroke-width:0.377953;stroke-linecap:square;stop-color:#000000"
+       d="M 0,4 H 20 V 24 H 0 Z" />
+    <path
+       id="rect236"
+       style="fill:#000000;fill-rule:evenodd;stroke:none;stroke-width:0.377953;stroke-linecap:square;stop-color:#000000"
+       d="M 0 4 L 0 24 L 20 24 L 20 11 L 18 13 L 18 22 L 2 22 L 2 6 L 17 6 L 19 4 L 0 4 z " />
+    <path
+       style="fill:#000000;fill-rule:evenodd;stroke:none;stroke-width:0.377953;stroke-linecap:square;stop-color:#000000"
+       d="M 4,15 6,13 9,16 22,3 24,5 9,20 Z"
+       id="path515" />
+  </g>
+</svg>
