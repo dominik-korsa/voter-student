@@ -29,9 +29,19 @@ body:has(.loading-page), html.page--loading body {
   justify-content: center;
   text-align: center;
 
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   .loading-page__title {
     font-size: 1.5rem;
     font-weight: normal;
+    animation: fadeIn 1000ms 1500ms backwards;
   }
 }
 </style>
