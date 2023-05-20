@@ -26,10 +26,10 @@
      inkscape:pagecheckerboard="1"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
-     showgrid="true"
-     inkscape:zoom="7.9358942"
-     inkscape:cx="-25.201949"
-     inkscape:cy="11.151862"
+     showgrid="false"
+     inkscape:zoom="22.246065"
+     inkscape:cx="9.9792928"
+     inkscape:cy="8.4284567"
      inkscape:window-width="1920"
      inkscape:window-height="991"
      inkscape:window-x="-9"
@@ -50,14 +50,14 @@
     <path
        id="rect290"
        style="fill:#f5c800;fill-rule:evenodd;stroke-width:0.377953;stroke-linecap:square;stop-color:#000000"
-       d="M 0,4 H 20 V 24 H 0 Z" />
+       d="M 0,2 H 20 V 22 H 0 Z" />
     <path
        id="rect236"
        style="fill:#000000;fill-rule:evenodd;stroke:none;stroke-width:0.377953;stroke-linecap:square;stop-color:#000000"
-       d="M 0 4 L 0 24 L 20 24 L 20 11 L 18 13 L 18 22 L 2 22 L 2 6 L 17 6 L 19 4 L 0 4 z " />
+       d="M 0,2 V 22 H 20 V 9 l -2,2 v 9 H 2 V 4 h 15 l 2,-2 z" />
     <path
        style="fill:#000000;fill-rule:evenodd;stroke:none;stroke-width:0.377953;stroke-linecap:square;stop-color:#000000"
-       d="M 4,15 6,13 9,16 22,3 24,5 9,20 Z"
+       d="M 4,13 6,11 9,14 22,1 24,3 9,18 Z"
        id="path515" />
   </g>
 </svg>
