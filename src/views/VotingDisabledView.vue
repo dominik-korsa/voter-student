@@ -11,24 +11,24 @@
 
 <script lang="ts" setup>
 import {useHTMLClass} from "../composables/html-class";
+import {useWindowSize} from "@vueuse/core";
+import {computed} from "vue";
 
 useHTMLClass('page--voting-disabled');
+
+const windowSize = useWindowSize();
+const height = computed(() => `${windowSize.height.value - 0.1}px`);
 </script>
 
 <style lang="scss">
 body:has(.voting-disabled), html.page--voting-disabled body {
-  height: 100vh;
-  overflow: hidden;
   overscroll-behavior-y: auto;
-
-  #app {
-    height: 100%;
-  }
 }
 
 .voting-disabled {
   padding: 16px;
-  height: 100%;
+  box-sizing: border-box;
+  min-height: v-bind(height);
   display: flex;
   align-items: center;
   justify-content: center;
