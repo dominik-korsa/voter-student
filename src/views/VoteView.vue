@@ -7,6 +7,7 @@
     'vote--covered': isCovered,
     'vote--covered-long': isCoveredCapacitor,
   }">
+    <div class="vote__top-shadow" />
     <div class="vote__demo-banner" v-if="systemInfo.isDemo">
       Demo
     </div>
@@ -252,6 +253,16 @@ body:has(.vote), html.page--vote body {
   overflow: hidden;
   min-height: 100vh;
 
+  .vote__top-shadow {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    height: 3px;
+    width: 100%;
+    background: #0003;
+  }
+
   .vote__demo-banner {
     position: fixed;
     top: 0;
@@ -298,7 +309,7 @@ body:has(.vote), html.page--vote body {
   $vote-next-width: 72px;
 
   .vote__button {
-    z-index: 1;
+    z-index: 3;
     position: fixed;
     bottom: 122px;
     box-sizing: content-box;
@@ -337,6 +348,7 @@ body:has(.vote), html.page--vote body {
     min-height: 100px;
     transition: min-height 800ms ease-out;
     padding-top: 8px;
+    z-index: 2;
     display: grid;
     grid-template-columns: 100%;
     grid-template-rows: minmax(100%, auto);
