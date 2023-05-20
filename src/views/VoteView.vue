@@ -12,23 +12,43 @@
       Demo
     </div>
     <div class="vote__list" v-memo="[cards]">
-      <card-slot
-        v-for="card in cards"
-        :key="card.number"
-        :number="card.number"
-        v-memo="[card.number, card.docked]"
-      >
-        <template #card>
-          <draggable-card
-            :number="card.number"
-            :isDocked="card.docked"
-            @begin-dragging="onDragStart"
-            @end-dragging="onDragEnd"
-            @dragging-move="onDragMove"
-            @reset="onReset"
-          />
-        </template>
-      </card-slot>
+      <h2>
+        Lista dostępnych logo
+      </h2>
+      <div class="vote__list-slots">
+        <card-slot
+          v-for="card in cards"
+          :key="card.number"
+          :number="card.number"
+          v-memo="[card.number, card.docked]"
+        >
+          <template #card>
+            <draggable-card
+              :number="card.number"
+              :isDocked="card.docked"
+              @begin-dragging="onDragStart"
+              @end-dragging="onDragEnd"
+              @dragging-move="onDragMove"
+              @reset="onReset"
+            />
+          </template>
+        </card-slot>
+      </div>
+
+      <h2>
+        Lista logo z klasy <b>{{ systemInfo.class }}</b>
+      </h2>
+      <h3>Nie możesz głosować na prace grup z twojej klasy</h3>
+      <div class="vote__list-slots">
+        <div
+          v-for="logo in systemInfo.forbiddenLogos"
+          :key="logo"
+          class="card card--disabled"
+          draggable="false"
+        >
+          <div class="card-footer">{{ logo }}</div>
+        </div>
+      </div>
     </div>
     <div class="vote__overlay" />
     <floating-button
@@ -281,13 +301,32 @@ body:has(.vote), html.page--vote body {
 
   .vote__list {
     padding: 8px 8px 140px + $card-height;
-    display: grid;
-    grid-gap: $card-gap;
-    grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
     max-width: calc((var(--card-width) + $card-gap) * 5 - $card-gap);
     margin-left: auto;
     margin-right: auto;
     justify-items: center;
+
+    h2 {
+      text-align: center;
+      font-weight: normal;
+      margin-top: 32px;
+      margin-bottom: 0;
+      font-size: 1.3rem;
+    }
+
+    h3 {
+      margin: 0;
+      text-align: center;
+      font-weight: normal;
+      font-size: 0.9rem;
+    }
+  }
+
+  .vote__list-slots {
+    margin-top: 32px;
+    display: grid;
+    grid-gap: $card-gap;
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
   }
 
   .vote__overlay {

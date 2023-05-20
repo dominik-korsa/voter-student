@@ -26,6 +26,7 @@ export interface SystemInfoResponseCodeFound {
   used: boolean;
   class: string;
   availableLogos: number[];
+  forbiddenLogos: number[];
 }
 
 export type SystemInfoResponsePartial = SystemInfoResponseReset | SystemInfoResponseNotVoting | SystemInfoResponseVotingPartial;
@@ -41,6 +42,7 @@ export interface SystemInfoValid {
   token: string;
   class: string;
   availableLogos: number[];
+  forbiddenLogos: number[];
   isDemo: boolean;
 }
 
