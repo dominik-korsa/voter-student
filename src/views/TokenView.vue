@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import {MaskaDetail, type MaskOptions, vMaska} from "maska";
+import {MaskaDetail, MaskInputOptions, vMaska} from "maska";
 import {computed, ref} from "vue";
 import {refAutoReset, useIntervalFn, useWindowSize, watchImmediate} from "@vueuse/core";
 import {LoadingErrorType} from "../types";
@@ -70,14 +70,28 @@ watchImmediate(errorType, (value) => {
 const windowSize = useWindowSize();
 const height = computed(() => `${windowSize.height.value - 0.1}px`);
 
-const maskOptions: MaskOptions = {
+let postProcessPrev = '';
+let preProcessDeleted = false;
+const maskOptions: MaskInputOptions = {
     mask: 'ZZZZ-ZZZZ',
+    eager: true,
     tokens: {
         'Z': {
             pattern: /[a-zA-Z\d]/, transform: (chr: string) => chr.toUpperCase(),
         }
     },
-}
+    preProcess: (value) => {
+      preProcessDeleted = value.length < postProcessPrev.length;
+      return value;
+    },
+    postProcess: (value) => {
+      if (preProcessDeleted && value[value.length - 1] === '-') {
+        value = value.substring(0, value.length - 1);
+      }
+      postProcessPrev = value;
+      return postProcessPrev;
+    },
+};
 
 const placeholder = ref('');
 useIntervalFn(() => {
