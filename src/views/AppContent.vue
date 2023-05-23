@@ -1,6 +1,10 @@
 <template>
+    <success-view
+      v-if="showSuccess"
+      @close="showSuccess = false"
+    />
     <voting-disabled-view
-        v-if="votingDisabled"
+        v-else-if="votingDisabled"
     />
     <token-view
         v-else-if="systemInfo === null"
@@ -21,10 +25,12 @@ import {usePath} from "../composables/path";
 import {LoadingErrorType} from "../types";
 import {getSystemInfo, getSystemInfoWithToken} from "../api";
 import {useTimeoutFn} from "@vueuse/core";
+import SuccessView from "./SuccessView.vue";
 
 const TokenView = defineAsyncComponent(() => import('./TokenView.vue'));
 const VotingDisabledView = defineAsyncComponent(() => import('./VotingDisabledView.vue'));
 const VoteView = defineAsyncComponent(() => import('./VoteView.vue'));
+const SuccessView = defineAsyncComponent(() => import('./SuccessView.vue'));
 
 const loadInitial = async () => {
     const { token, replacePath } = usePath();
@@ -51,7 +57,7 @@ const loadInitial = async () => {
 }
 
 export default defineComponent({
-    components: {VoteView, VotingDisabledView, TokenView},
+    components: {SuccessView, VoteView, VotingDisabledView, TokenView},
     setup: async () => {
         const {
             votingDisabled,
@@ -60,6 +66,8 @@ export default defineComponent({
             systemInfo,
             replacePath,
         } = await loadInitial();
+
+        const showSuccess = ref(false);
 
         return {
             votingDisabled,
@@ -92,11 +100,13 @@ export default defineComponent({
                 }, 750);
                 return null;
             },
+            showSuccess,
             onSuccess: () => {
                 replacePath(null);
                 initialToken.value = null;
                 initialLoadingError.value = null;
                 systemInfo.value = null;
+                showSuccess.value = true;
             },
         }
     },
