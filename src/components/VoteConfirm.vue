@@ -27,7 +27,8 @@
           class="vote-confirm__submit"
           @click="submit"
           :loading="loading"
-          :disable="confirmed || !voteUnlocked"
+          :disable="confirmed"
+          :blocked="!voteUnlocked"
         >
           Oddaj głos 🚀
         ️</floating-button>
@@ -59,7 +60,7 @@ defineEmits<{
 }>();
 
 const initialTimePassed = useTimePassed(50);
-const voteUnlocked = useTimePassed(2000);
+const voteUnlocked = useTimePassed(4000);
 const hidden = computedEager(() => !props.visible || !initialTimePassed.value);
 
 const confirmed = ref(false);

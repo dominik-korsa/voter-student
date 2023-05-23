@@ -3,8 +3,9 @@
     class="floating-button"
     :class="{
       'floating-button--loading': loading,
+      'floating-button--blocked': blocked,
     }"
-    :disabled="disable || loading"
+    :disabled="disable || loading || blocked"
     :tabindex="disable ? -1 : 0"
   >
     <span class="floating-button__content">
@@ -24,6 +25,7 @@ export default defineComponent({
   components: {LoadingDots},
   props: {
     disable: Boolean,
+    blocked: Boolean,
     loading: Boolean,
   },
 });
@@ -51,6 +53,7 @@ export default defineComponent({
     bottom var(--position-transinition-duration),
     right var(--position-transinition-duration),
     left var(--position-transinition-duration),
+    background 500ms,
     box-shadow 200ms,
     transform 200ms;
   cursor: pointer;
@@ -75,6 +78,11 @@ export default defineComponent({
   &:not(.floating-button--loading) > .floating-button__loading {
     opacity: 0;
     pointer-events: none;
+  }
+
+  &.floating-button--blocked {
+    background: #666;
+    cursor: default;
   }
 
   @media screen and (max-width: 400px) {
