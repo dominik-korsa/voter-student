@@ -38,12 +38,18 @@ defineEmits(['close']);
     margin: 0;
     line-height: 1;
     text-shadow: 3px 3px #0003;
+    animation: scaleAppear 500ms 250ms backwards;
   }
 
   h1 {
     font-size: 1.8rem;
     margin-top: 56px;
     margin-bottom: 64px;
+    animation: scaleAppear 500ms 400ms backwards;
+  }
+
+  .floating-button {
+    animation: fadeIn 1000ms 2000ms backwards;
   }
 }
 </style>

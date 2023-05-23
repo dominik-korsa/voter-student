@@ -141,10 +141,6 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
 <style lang="scss">
 @import "../assets/constants";
 
-@keyframes token__input-appear {
-  from { transform: scale(0); }
-}
-
 @keyframes token__other-appear {
   from { opacity: 0; }
 }
@@ -183,7 +179,7 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
     box-shadow: 3px 3px #0003;
     transition: box-shadow 200ms, transform 200ms, margin-bottom $loading-transition;
     margin-bottom: $loading-height;
-    animation: token__input-appear 500ms 250ms backwards;
+    animation: scaleAppear 500ms 250ms backwards;
 
     &:focus-within {
       box-shadow: 5px 5px #0003;
