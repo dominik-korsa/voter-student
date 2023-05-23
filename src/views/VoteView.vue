@@ -268,10 +268,14 @@ body:has(.vote), html.page--vote body {
 }
 
 .vote {
-  user-select: none;
   position: relative;
   overflow: hidden;
   min-height: 100vh;
+
+  &, * {
+    user-select: none;
+    -webkit-user-select: none;
+  }
 
   .vote__top-shadow {
     position: fixed;
