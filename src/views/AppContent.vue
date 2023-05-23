@@ -25,7 +25,6 @@ import {usePath} from "../composables/path";
 import {LoadingErrorType} from "../types";
 import {getSystemInfo, getSystemInfoWithToken} from "../api";
 import {useTimeoutFn} from "@vueuse/core";
-import SuccessView from "./SuccessView.vue";
 
 const TokenView = defineAsyncComponent(() => import('./TokenView.vue'));
 const VotingDisabledView = defineAsyncComponent(() => import('./VotingDisabledView.vue'));
