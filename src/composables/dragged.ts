@@ -1,5 +1,5 @@
 import {onBeforeUnmount, ref, Ref, StyleValue} from "vue";
-import {computedEager, refAutoReset, useEventListener, useVibrate} from "@vueuse/core";
+import {computedEager, refAutoReset, useDebounceFn, useEventListener, useVibrate} from "@vueuse/core";
 import {Offset, StatePointer} from "../types";
 
 interface IdleState {
@@ -51,6 +51,16 @@ export const useDragged = (
         };
     };
 
+  const cancel = () => {
+    if (state.value.type === 'dragging') {
+      cardEl.value?.releasePointerCapture(state.value.pointer.pointerId);
+    }
+    if (state.value.type === 'waiting') clearTimeout(state.value.timeoutId);
+    state.value = { type: 'idle' };
+  };
+
+  const delayCancel = useDebounceFn(cancel, 2500);
+
     const startNow = (getOffset: () => Offset, pointer: StatePointer) => {
         if (state.value.type === 'dragging') return;
         if (state.value.type === 'waiting') clearTimeout(state.value.timeoutId);
@@ -67,6 +77,7 @@ export const useDragged = (
         };
         cardEl.value?.setPointerCapture(state.value.pointer.pointerId);
         vibrate();
+        delayCancel().catch(console.error);
     }
 
     const startDelayed = (getOffset: () => Offset, pointer: StatePointer) => {
@@ -86,14 +97,7 @@ export const useDragged = (
         else startNow(getOffset, pointer);
     };
 
-    const cancel = () => {
-        if (state.value.type === 'dragging') {
-            cardEl.value?.releasePointerCapture(state.value.pointer.pointerId);
-        }
-        if (state.value.type === 'waiting') clearTimeout(state.value.timeoutId);
-        state.value = { type: 'idle' };
-    };
-    const reset = (offset: Offset) => {
+  const reset = (offset: Offset) => {
         resetOffset.value = offset;
         onReset();
     }
@@ -122,6 +126,7 @@ export const useDragged = (
         if (state.value.type === 'idle') return;
         if (state.value.pointer.pointerId !== event.pointerId) return;
         state.value.pointer = event;
+        delayCancel().catch(console.error);
         onMove(event);
     }, { passive: true });
 
