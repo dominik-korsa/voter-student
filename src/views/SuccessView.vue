@@ -1,25 +1,38 @@
 <template>
-  <div class="success">
+  <div class="success" :class="{
+    'success--closing': closing,
+  }">
     <div class="success__emoji">
       🗳️
     </div>
     <h1>️Głos policzony!</h1>
 
-    <floating-button @click="$emit('close')">Wróć do ekranu głównego</floating-button>
+    <floating-button @click="close()">
+      Wróć do ekranu głównego
+    </floating-button>
   </div>
 </template>
 <script setup lang="ts">
 import FloatingButton from "../components/FloatingButton.vue";
 import {useHTMLClass} from "../composables/html-class";
-import {useWindowSize} from "@vueuse/core";
-import {computed} from "vue";
+import {useTimeoutFn, useWindowSize} from "@vueuse/core";
+import {computed, ref} from "vue";
+
+const emit = defineEmits(['close']);
 
 useHTMLClass('page--success');
 
 const windowSize = useWindowSize();
 const height = computed(() => `${windowSize.height.value - 0.1}px`);
 
-defineEmits(['close']);
+const closing = ref(false);
+const close = () => {
+  if (closing.value) return;
+  closing.value = true;
+  useTimeoutFn(() => {
+    emit('close');
+  }, 1000);
+}
 </script>
 
 <style lang="scss">
@@ -32,6 +45,11 @@ defineEmits(['close']);
   justify-content: center;
   text-align: center;
   flex-direction: column;
+
+  &.success--closing {
+    transition: opacity 400ms;
+    opacity: 0;
+  }
 
   .success__emoji {
     font-size: 5rem;
