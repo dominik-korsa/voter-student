@@ -97,6 +97,7 @@ const submit = async () => {
 <style lang="scss">
 @use "sass:math";
 @import "src/assets/constants";
+@import "src/assets/mixins";
 
 $total-duration: 500ms;
 $single-duration: 200ms;
@@ -108,7 +109,6 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
   overflow-y: auto;
   box-sizing: border-box;
   padding-top: 16px;
-  user-select: text;
 
   .vote-confirm__title {
     text-align: center;
@@ -196,8 +196,8 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
   }
 
   &.vote-confirm--hidden {
-    user-select: none;
     pointer-events: none;
+    @include noSelect();
 
     .vote-confirm__animated {
       transform: translateY(-30px);
@@ -207,7 +207,7 @@ $single-offset: math.div(($total-duration - $single-duration), ($count - 1));
   }
 
   &.vote-confirm--confirmed {
-    user-select: none;
+    @include noSelect();
 
     @keyframes cardDisappear {
       to {

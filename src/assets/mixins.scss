@@ -1,0 +1,6 @@
+@mixin noSelect {
+  &, & * {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}

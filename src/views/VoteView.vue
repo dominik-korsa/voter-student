@@ -262,6 +262,7 @@ const cards = computedEager(() => {
 
 <style lang="scss">
 @import "../assets/constants";
+@import "../assets/mixins";
 
 body:has(.vote), html.page--vote body {
   background: $yellow-dark;
@@ -271,11 +272,6 @@ body:has(.vote), html.page--vote body {
   position: relative;
   overflow: hidden;
   min-height: 100vh;
-
-  &, * {
-    user-select: none;
-    -webkit-user-select: none;
-  }
 
   .vote__top-shadow {
     position: fixed;
@@ -301,6 +297,7 @@ body:has(.vote), html.page--vote body {
     text-transform: uppercase;
     z-index: 500;
     font-weight: bold;
+    @include noSelect();
   }
 
   .vote__list {
@@ -309,6 +306,7 @@ body:has(.vote), html.page--vote body {
     margin-left: auto;
     margin-right: auto;
     justify-items: center;
+    @include noSelect();
 
     h2 {
       text-align: center;
@@ -412,6 +410,7 @@ body:has(.vote), html.page--vote body {
       width: 100%;
       display: flex;
       align-self: end;
+      @include noSelect();
     }
 
     .podium {

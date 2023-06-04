@@ -140,6 +140,7 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
 
 <style lang="scss">
 @import "../assets/constants";
+@import "../assets/mixins";
 
 @keyframes token__other-appear {
   from { opacity: 0; }
@@ -259,8 +260,8 @@ const onMaska = (event: CustomEvent<MaskaDetail>) => {
     animation-delay: 1250ms;
 
     &:not(.error--visible) {
-      user-select: none;
       opacity: 0;
+      @include noSelect();
     }
   }
 

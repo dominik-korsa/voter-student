@@ -33,6 +33,7 @@ export default defineComponent({
 
 <style lang="scss">
 @import "src/assets/constants";
+@import "src/assets/mixins";
 
 .floating-button {
   background: $green;
@@ -57,11 +58,11 @@ export default defineComponent({
     box-shadow 200ms,
     transform 200ms;
   cursor: pointer;
-  user-select: none;
   --height: calc(2 * var(--vertical-padding) + #{$line-height});
   display: grid;
   grid-template-rows: 1fr;
   grid-template-columns: 1fr;
+  @include noSelect();
 
   .floating-button__content, .floating-button__loading {
     grid-row: 1;

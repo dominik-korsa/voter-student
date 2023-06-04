@@ -1,4 +1,5 @@
 @import "../assets/constants";
+@import "../assets/mixins";
 
 .card {
   width: var(--card-width);
@@ -7,10 +8,10 @@
   background: #fff;
   border-radius: 12px;
   box-shadow: 3px 3px #0003;
-  user-select: none;
   cursor: grab;
   transition: transform 150ms, box-shadow 150ms, top 300ms, left 300ms;
   touch-action: manipulation;
+  @include noSelect();
 
   &.card--hoverable:hover, &.card--raised, &.card--hidden {
     transform: scale(105%);
