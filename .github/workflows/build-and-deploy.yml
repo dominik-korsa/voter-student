@@ -3,6 +3,7 @@ on:
 
 jobs:
   build-and-deploy:
+    name: Build and deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,7 +27,7 @@ jobs:
           # --delete: delete extraneous files from dest dirs
           switches: -vzr --delete
           path: dist/
-          remote_path: ${{ DEPLOY_PATH }}
-          remote_host: ${{ DEPLOY_HOST }}
-          remote_user: ${{ DEPLOY_USER }}
+          remote_path: ${{ vars.DEPLOY_PATH }}
+          remote_host: ${{ vars.DEPLOY_HOST }}
+          remote_user: ${{ vars.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_KEY }}
