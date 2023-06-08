@@ -24,7 +24,7 @@ export interface SystemInfoResponseCodeFound {
   voting: true;
   found: true;
   used: boolean;
-  class: string;
+  class: string | null;
   availableLogos: number[];
   forbiddenLogos: number[];
 }
@@ -40,7 +40,7 @@ export type SystemInfoResponse =
 
 export interface SystemInfoValid {
   token: string;
-  class: string;
+  class: string | null;
   availableLogos: number[];
   forbiddenLogos: number[];
   isDemo: boolean;

@@ -35,20 +35,25 @@
         </card-slot>
       </div>
 
-      <h2>
-        Lista logo z klasy <b>{{ systemInfo.class }}</b>
-      </h2>
-      <h3>Nie możesz głosować na prace grup z twojej klasy</h3>
-      <div class="vote__list-slots">
-        <div
-          v-for="logo in systemInfo.forbiddenLogos"
-          :key="logo"
-          class="card card--disabled"
-          draggable="false"
-        >
-          <div class="card-footer">{{ logo }}</div>
+      <template v-if="systemInfo.forbiddenLogos.length > 0">
+        <h2 v-if="systemInfo.class">
+          Lista logo z klasy <b>{{ systemInfo.class }}</b>
+        </h2>
+        <h2 v-else>
+          Lista logo, na które nie możesz zagłosować
+        </h2>
+        <h3>Nie możesz głosować na prace grup z twojej klasy</h3>
+        <div class="vote__list-slots">
+          <div
+            v-for="logo in systemInfo.forbiddenLogos"
+            :key="logo"
+            class="card card--disabled"
+            draggable="false"
+          >
+            <div class="card-footer">{{ logo }}</div>
+          </div>
         </div>
-      </div>
+      </template>
     </div>
     <div class="vote__overlay" />
     <floating-button
